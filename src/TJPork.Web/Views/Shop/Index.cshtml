@@ -1,0 +1,93 @@
+@model TJPork.Web.ViewModels.ShopViewModel
+@{
+    ViewData["Title"] = "Artisanal Pork Catalog & Cuts";
+}
+
+<div class="container" style="margin-top: 110px; margin-bottom: 80px;">
+    <!-- Shop Header -->
+    <div style="margin-bottom: 32px;">
+        <span style="color: var(--accent-orange); font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">Heritage Butchery</span>
+        <h1 style="font-size: 2.5rem; margin-top: 4px;">Artisanal Pork Catalog</h1>
+        <p style="color: var(--text-secondary); font-size: 1rem;">Showing @Model.TotalCount premium cuts prepared in small batches.</p>
+    </div>
+
+    <!-- Main Shop Layout: Sidebar Filters + Products Grid -->
+    <div style="display: grid; grid-template-columns: 280px 1fr; gap: 32px; align-items: start;">
+        <!-- Filters Sidebar -->
+        <aside class="tjp-card" style="padding: 24px; position: sticky; top: 96px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #EEF2F6; padding-bottom: 12px;">
+                <h3 style="font-size: 1.15rem;"><i class="fa-solid fa-filter" style="color: var(--accent-orange); margin-right: 8px;"></i> Filters</h3>
+                <a asp-action="Index" style="font-size: 0.82rem; color: var(--accent-orange); font-weight: 600;">Reset</a>
+            </div>
+
+            <form method="get" asp-action="Index">
+                <!-- Search Term -->
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Search Cuts</label>
+                    <input type="text" name="search" value="@Model.SearchTerm" class="tjp-input" placeholder="e.g. Bacon, Bratwurst..." />
+                </div>
+
+                <!-- Categories -->
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Category</label>
+                    <select name="categoryId" class="tjp-select">
+                        <option value="">All Categories</option>
+                        @foreach (var cat in Model.Categories)
+                        {
+                            <option value="@cat.Id" selected="@(Model.SelectedCategoryId == cat.Id)">@cat.Name</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Price Range -->
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Price Range (R)</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="number" step="1" name="minPrice" value="@Model.MinPrice" class="tjp-input" placeholder="Min" style="padding: 8px;" />
+                        <span style="color: var(--text-muted);">&ndash;</span>
+                        <input type="number" step="1" name="maxPrice" value="@Model.MaxPrice" class="tjp-input" placeholder="Max" style="padding: 8px;" />
+                    </div>
+                </div>
+
+                <!-- Sort By -->
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Sort Order</label>
+                    <select name="sortBy" class="tjp-select">
+                        <option value="featured" selected="@(Model.SortBy == "featured")">Featured First</option>
+                        <option value="price-low" selected="@(Model.SortBy == "price-low")">Price: Low to High</option>
+                        <option value="price-high" selected="@(Model.SortBy == "price-high")">Price: High to Low</option>
+                        <option value="rating" selected="@(Model.SortBy == "rating")">Highest Rated</option>
+                        <option value="popular" selected="@(Model.SortBy == "popular")">Most Popular</option>
+                        <option value="newest" selected="@(Model.SortBy == "newest")">Newest Arrivals</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="tjp-btn tjp-btn-primary" style="width: 100%; margin-top: 10px;">
+                    <i class="fa-solid fa-check"></i> Apply Filters
+                </button>
+            </form>
+        </aside>
+
+        <!-- Product Cards Grid -->
+        <main>
+            @if (!Model.Products.Any())
+            {
+                <div class="tjp-card" style="text-align: center; padding: 60px 20px;">
+                    <i class="fa-solid fa-magnifying-glass fa-3x" style="color: var(--text-muted); margin-bottom: 16px;"></i>
+                    <h3 style="font-size: 1.3rem; margin-bottom: 8px;">No cuts matched your criteria</h3>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px;">Try loosening your filters or search keywords.</p>
+                    <a asp-action="Index" class="tjp-btn tjp-btn-primary tjp-btn-sm">View All Cuts</a>
+                </div>
+            }
+            else
+            {
+                <div class="grid-products">
+                    @foreach (var product in Model.Products)
+                    {
+                        <partial name="_ProductCard" model="product" />
+                    }
+                </div>
+            }
+        </main>
+    </div>
+</div>

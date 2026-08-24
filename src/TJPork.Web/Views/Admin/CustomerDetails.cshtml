@@ -1,0 +1,104 @@
+@model TJPork.Web.ViewModels.AdminCustomerDetailViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = $"Customer: {Model.Customer.FullName}";
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-action="Customers" class="tjp-btn tjp-btn-neu tjp-btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Customers</a>
+</div>
+
+<!-- Header Card -->
+<div class="tjp-card" style="padding: 28px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 18px;">
+        <img src="@(Model.Customer.AvatarUrl ?? "/images/avatars/default.png")" alt="@Model.Customer.FullName" style="width: 72px; height: 72px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--accent-orange);" />
+        <div>
+            <h2 style="font-size: 1.6rem; margin-bottom: 4px;">@Model.Customer.FullName</h2>
+            <div style="font-size: 0.9rem; color: var(--text-secondary); display: flex; gap: 14px; flex-wrap: wrap;">
+                <span><i class="fa-solid fa-envelope" style="color: var(--accent-orange); margin-right: 4px;"></i>@Model.Customer.Email</span>
+                <span><i class="fa-solid fa-phone" style="color: var(--accent-green); margin-right: 4px;"></i>@Model.Customer.PhoneNumber</span>
+                <span><i class="fa-solid fa-calendar" style="color: #3498DB; margin-right: 4px;"></i>Member since @Model.Customer.CreatedAt.ToString("MMM dd, yyyy")</span>
+            </div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 20px;">
+        <div style="text-align: right;">
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Lifetime Spend</div>
+            <div class="mono" style="font-size: 1.5rem; font-weight: 800; color: var(--accent-green);">R@(Model.LifetimeSpend.ToString("F2"))</div>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Total Orders</div>
+            <div class="mono" style="font-size: 1.5rem; font-weight: 800; color: var(--text-primary);">@Model.TotalOrdersCount</div>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 28px;">
+    <!-- Left: Order History -->
+    <div class="tjp-card" style="padding: 24px;">
+        <h3 style="font-size: 1.2rem; margin-bottom: 16px;"><i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-orange); margin-right: 8px;"></i> Customer Order History</h3>
+
+        @if (!Model.Orders.Any())
+        {
+            <p style="color: var(--text-muted); text-align: center; padding: 20px;">No orders on record.</p>
+        }
+        else
+        {
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #EEF2F6; color: var(--text-secondary); text-align: left; font-size: 0.82rem;">
+                            <th style="padding: 10px 0;">Order #</th>
+                            <th style="padding: 10px 0;">Date</th>
+                            <th style="padding: 10px 0; text-align: right;">Total</th>
+                            <th style="padding: 10px 0; text-align: center;">Delivery</th>
+                            <th style="padding: 10px 0; text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ord in Model.Orders)
+                        {
+                            <tr style="border-bottom: 1px solid #F1F5F9;">
+                                <td style="padding: 12px 0;" class="mono"><strong style="color: var(--accent-orange);">#@ord.OrderNumber</strong></td>
+                                <td style="padding: 12px 0; color: var(--text-secondary);">@ord.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                <td style="padding: 12px 0; text-align: right;" class="mono"><strong>R@(ord.TotalAmount.ToString("F2"))</strong></td>
+                                <td style="padding: 12px 0; text-align: center;">
+                                    <span class="tjp-badge" style="position: static; font-size: 0.72rem; background: @(ord.DeliveryStatus == OrderStatus.Delivered ? "var(--accent-green)" : "var(--accent-orange)");">
+                                        @ord.DeliveryStatus
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 0; text-align: right;">
+                                    <button type="button" class="tjp-btn tjp-btn-neu tjp-btn-sm view-order-btn" data-order-id="@ord.Id" style="padding: 4px 8px; font-size: 0.75rem;">
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <!-- Right: Admin Notes & Delivery Details -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        <!-- Delivery Details -->
+        <div class="tjp-card" style="padding: 20px;">
+            <h4 style="font-size: 1.05rem; margin-bottom: 12px;"><i class="fa-solid fa-location-dot" style="color: var(--accent-orange); margin-right: 6px;"></i> Default Delivery Address</h4>
+            <p style="margin-bottom: 4px; font-size: 0.92rem;">@Model.Customer.DeliveryAddress</p>
+            <p style="font-size: 0.88rem; color: var(--text-secondary);">@Model.Customer.City, @Model.Customer.PostalCode</p>
+        </div>
+
+        <!-- Internal Notes -->
+        <div class="tjp-card" style="padding: 20px;">
+            <h4 style="font-size: 1.05rem; margin-bottom: 12px;"><i class="fa-solid fa-note-sticky" style="color: #F1C40F; margin-right: 6px;"></i> Internal Owner Notes</h4>
+            <form asp-action="UpdateCustomerNotes" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="customerId" value="@Model.Customer.Id" />
+                <textarea name="notes" rows="4" class="tjp-textarea" placeholder="Add private notes regarding VIP customer cuts, custom requests, preferences..." style="font-size: 0.88rem; margin-bottom: 12px;">@Model.Customer.AdminNotes</textarea>
+                <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="width: 100%;">Save Notes</button>
+            </form>
+        </div>
+    </div>
+</div>

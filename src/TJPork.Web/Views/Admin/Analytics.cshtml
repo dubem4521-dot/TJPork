@@ -1,0 +1,136 @@
+@model TJPork.Web.ViewModels.AdminAnalyticsViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Analytics & Revenue Reports";
+}
+
+<!-- Export & Date Range Header -->
+<div class="tjp-card" style="padding: 20px 24px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <form method="get" asp-action="Analytics" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <label style="font-size: 0.88rem; font-weight: 600;">Date Range:</label>
+        <input type="date" name="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" class="tjp-input" style="width: auto; padding: 6px 12px; font-size: 0.88rem;" />
+        <span style="color: var(--text-muted);">&ndash;</span>
+        <input type="date" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" class="tjp-input" style="width: auto; padding: 6px 12px; font-size: 0.88rem;" />
+        <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm"><i class="fa-solid fa-arrows-rotate"></i> Update</button>
+    </form>
+
+    <a asp-action="ExportRevenueCsv" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")" asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")" class="tjp-btn tjp-btn-primary">
+        <i class="fa-solid fa-file-csv"></i> Download CSV Report
+    </a>
+</div>
+
+<!-- Financial Summary KPI Row -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px;">
+    <div class="tjp-metric-card">
+        <div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Total Revenue</div>
+            <div class="mono" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-green);">R@(Model.Summary.TotalRevenue.ToString("F2"))</div>
+        </div>
+        <div class="tjp-metric-icon" style="background: var(--accent-green-light); color: var(--accent-green);">
+            <i class="fa-solid fa-sack-dollar"></i>
+        </div>
+    </div>
+
+    <div class="tjp-metric-card">
+        <div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Total Orders Fulfilled</div>
+            <div class="mono" style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary);">@Model.Summary.TotalOrders</div>
+        </div>
+        <div class="tjp-metric-icon" style="background: var(--accent-orange-light); color: var(--accent-orange);">
+            <i class="fa-solid fa-truck-ramp-box"></i>
+        </div>
+    </div>
+
+    <div class="tjp-metric-card">
+        <div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Average Order Value</div>
+            <div class="mono" style="font-size: 1.8rem; font-weight: 800; color: #3498DB;">R@(Model.Summary.AverageOrderValue.ToString("F2"))</div>
+        </div>
+        <div class="tjp-metric-icon" style="background: #EBF5FB; color: #3498DB;">
+            <i class="fa-solid fa-chart-pie"></i>
+        </div>
+    </div>
+
+    <div class="tjp-metric-card">
+        <div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Repeat Customer Rate</div>
+            <div class="mono" style="font-size: 1.8rem; font-weight: 800; color: #9B59B6;">84.2%</div>
+        </div>
+        <div class="tjp-metric-icon" style="background: #F4ECF7; color: #9B59B6;">
+            <i class="fa-solid fa-heart-circle-check"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Revenue Chart -->
+<div class="tjp-card" style="padding: 28px; margin-bottom: 32px;">
+    <h3 style="font-size: 1.25rem; margin-bottom: 20px;"><i class="fa-solid fa-chart-area" style="color: var(--accent-orange); margin-right: 8px;"></i> Revenue Trajectory (30-Day Period)</h3>
+    <div style="height: 320px; position: relative;">
+        <canvas id="detailedSalesCanvas"></canvas>
+    </div>
+</div>
+
+<!-- Top Products and Category Distribution -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- Best Sellers -->
+    <div class="tjp-card" style="padding: 24px;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 16px;"><i class="fa-solid fa-award" style="color: #F1C40F; margin-right: 8px;"></i> Best-Selling Cuts</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #EEF2F6; color: var(--text-secondary); text-align: left; font-size: 0.82rem;">
+                        <th style="padding: 8px 0;">Product</th>
+                        <th style="padding: 8px 0; text-align: center;">Sold</th>
+                        <th style="padding: 8px 0; text-align: right;">Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Summary.TopSellingProducts)
+                    {
+                        <tr style="border-bottom: 1px solid #F1F5F9;">
+                            <td style="padding: 10px 0; font-weight: 600;">@p.ProductName</td>
+                            <td style="padding: 10px 0; text-align: center;" class="mono">@p.UnitsSold</td>
+                            <td style="padding: 10px 0; text-align: right; font-weight: 700; color: var(--accent-green);" class="mono">R@(p.TotalRevenue.ToString("F2"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Category Revenue Share -->
+    <div class="tjp-card" style="padding: 24px;">
+        <h3 style="font-size: 1.15rem; margin-bottom: 16px;"><i class="fa-solid fa-layer-group" style="color: var(--accent-orange); margin-right: 8px;"></i> Revenue by Cut Category</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #EEF2F6; color: var(--text-secondary); text-align: left; font-size: 0.82rem;">
+                        <th style="padding: 8px 0;">Category</th>
+                        <th style="padding: 8px 0; text-align: center;">Items Sold</th>
+                        <th style="padding: 8px 0; text-align: right;">Total Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var cat in Model.Summary.CategoryBreakdown)
+                    {
+                        <tr style="border-bottom: 1px solid #F1F5F9;">
+                            <td style="padding: 10px 0; font-weight: 600;">@cat.CategoryName</td>
+                            <td style="padding: 10px 0; text-align: center;" class="mono">@cat.ItemsSold</td>
+                            <td style="padding: 10px 0; text-align: right; font-weight: 700; color: var(--accent-green);" class="mono">R@(cat.Revenue.ToString("F2"))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.Last30DaysSales.Select(s => s.Date)));
+            const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.Last30DaysSales.Select(s => s.Revenue)));
+            initSalesChart('detailedSalesCanvas', labels, data);
+        });
+    </script>
+}

@@ -1,0 +1,81 @@
+@model TJPork.Web.ViewModels.AdminCustomerListViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Customer Management & CRM";
+}
+
+<!-- Search Bar -->
+<div class="tjp-card" style="padding: 18px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <form method="get" asp-action="Customers" style="display: flex; gap: 10px; flex: 1; max-width: 420px;">
+        <input type="text" name="search" value="@Model.Search" class="tjp-input" placeholder="Search customer by name, email, or phone..." style="padding: 8px 14px;" />
+        <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </form>
+
+    <span style="font-size: 0.88rem; color: var(--text-muted); font-weight: 600;">@Model.Customers.Count Registered Food Lovers</span>
+</div>
+
+<!-- Customer List Table -->
+<div class="tjp-card" style="padding: 0; overflow: hidden;">
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+            <thead>
+                <tr style="background: var(--bg-surface); border-bottom: 1px solid #EEF2F6; color: var(--text-secondary); font-size: 0.82rem;">
+                    <th style="padding: 14px 20px;">Customer</th>
+                    <th style="padding: 14px 20px;">Contact</th>
+                    <th style="padding: 14px 20px;">Joined</th>
+                    <th style="padding: 14px 20px; text-align: center;">Total Orders</th>
+                    <th style="padding: 14px 20px; text-align: right;">Lifetime Spend</th>
+                    <th style="padding: 14px 20px; text-align: center;">Status</th>
+                    <th style="padding: 14px 20px; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cust in Model.Customers)
+                {
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td style="padding: 14px 20px; display: flex; align-items: center; gap: 12px;">
+                            <img src="@cust.AvatarUrl" alt="@cust.FullName" style="width: 40px; height: 40px; border-radius: var(--radius-full); object-fit: cover;" onerror="this.src='/images/avatars/default.png'" />
+                            <div>
+                                <strong style="color: var(--text-primary); display: block;">@cust.FullName</strong>
+                                <span style="font-size: 0.78rem; color: var(--text-muted);">ID: @cust.Id.Substring(0, Math.Min(8, cust.Id.Length))</span>
+                            </div>
+                        </td>
+                        <td style="padding: 14px 20px;">
+                            <div style="color: var(--text-primary); font-size: 0.88rem;">@cust.Email</div>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">@cust.PhoneNumber</div>
+                        </td>
+                        <td style="padding: 14px 20px; color: var(--text-secondary);">
+                            @cust.JoinDate.ToString("MMM dd, yyyy")
+                        </td>
+                        <td style="padding: 14px 20px; text-align: center;" class="mono">
+                            <span style="font-weight: 700;">@cust.TotalOrders</span>
+                        </td>
+                        <td style="padding: 14px 20px; text-align: right;" class="mono">
+                            <strong style="color: var(--accent-green); font-size: 0.98rem;">R@(cust.LifetimeSpend.ToString("F2"))</strong>
+                        </td>
+                        <td style="padding: 14px 20px; text-align: center;">
+                            <span class="tjp-badge" style="position: static; font-size: 0.75rem; background: @(cust.IsBlocked ? "var(--danger)" : "var(--accent-green)");">
+                                @(cust.IsBlocked ? "Blocked" : "Active")
+                            </span>
+                        </td>
+                        <td style="padding: 14px 20px; text-align: right;">
+                            <div style="display: inline-flex; gap: 6px;">
+                                <a asp-action="CustomerDetails" asp-route-id="@cust.Id" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="padding: 6px 12px; font-size: 0.8rem;">
+                                    <i class="fa-solid fa-user"></i> View Profile
+                                </a>
+
+                                <form asp-action="ToggleBlockCustomer" method="post" style="display: inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="customerId" value="@cust.Id" />
+                                    <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="padding: 6px 10px; color: @(cust.IsBlocked ? "var(--accent-green)" : "var(--danger)");" title="@(cust.IsBlocked ? "Unblock Customer" : "Block Customer")">
+                                        <i class="fa-solid @(cust.IsBlocked ? "fa-lock-open" : "fa-ban")"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

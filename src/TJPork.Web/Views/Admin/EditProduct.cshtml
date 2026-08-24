@@ -1,0 +1,151 @@
+@model TJPork.Web.ViewModels.AdminProductEditViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = $"Edit Product - {Model.Name}";
+}
+
+<div class="tjp-card" style="max-width: 860px; margin: 0 auto; padding: 36px;">
+    <div style="margin-bottom: 24px; border-bottom: 1px solid #EEF2F6; padding-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 4px;">Edit: @Model.Name</h2>
+            <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">Update pricing, stock availability, photos, or description.</p>
+        </div>
+        <a asp-action="Products" class="tjp-btn tjp-btn-neu tjp-btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Products</a>
+    </div>
+
+    <form asp-action="EditProduct" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <div asp-validation-summary="ModelOnly" style="color: var(--danger); font-size: 0.88rem; margin-bottom: 16px;"></div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+            <div class="tjp-input-group">
+                <label asp-for="Name" class="tjp-label"></label>
+                <input asp-for="Name" class="tjp-input" />
+                <span asp-validation-for="Name" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+
+            <div class="tjp-input-group">
+                <label asp-for="CategoryId" class="tjp-label"></label>
+                <select asp-for="CategoryId" class="tjp-select">
+                    @foreach (var cat in Model.AvailableCategories)
+                    {
+                        <option value="@cat.Id" selected="@(Model.CategoryId == cat.Id)">@cat.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="CategoryId" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+        </div>
+
+        <div class="tjp-input-group">
+            <div style="display: flex; justify-content: space-between;">
+                <label asp-for="ShortDescription" class="tjp-label"></label>
+                <span id="charCount" style="font-size: 0.78rem; color: var(--text-muted);">@Model.ShortDescription.Length / 150</span>
+            </div>
+            <input asp-for="ShortDescription" id="shortDescInput" class="tjp-input" maxlength="150" />
+            <span asp-validation-for="ShortDescription" style="color: var(--danger); font-size: 0.8rem;"></span>
+        </div>
+
+        <div class="tjp-input-group">
+            <label asp-for="LongDescription" class="tjp-label"></label>
+            <textarea asp-for="LongDescription" rows="5" class="tjp-textarea"></textarea>
+            <span asp-validation-for="LongDescription" style="color: var(--danger); font-size: 0.8rem;"></span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+            <div class="tjp-input-group">
+                <label asp-for="Price" class="tjp-label"></label>
+                <input asp-for="Price" type="number" step="0.01" class="tjp-input" />
+                <span asp-validation-for="Price" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+
+            <div class="tjp-input-group">
+                <label asp-for="DiscountPercentage" class="tjp-label"></label>
+                <input asp-for="DiscountPercentage" type="number" class="tjp-input" />
+                <span asp-validation-for="DiscountPercentage" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+
+            <div class="tjp-input-group">
+                <label asp-for="StockQuantity" class="tjp-label"></label>
+                <input asp-for="StockQuantity" type="number" class="tjp-input" />
+                <span asp-validation-for="StockQuantity" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="tjp-input-group">
+                <label asp-for="WeightDescription" class="tjp-label"></label>
+                <input asp-for="WeightDescription" class="tjp-input" />
+            </div>
+
+            <div class="tjp-input-group">
+                <label asp-for="CuringMethod" class="tjp-label"></label>
+                <input asp-for="CuringMethod" class="tjp-input" />
+            </div>
+        </div>
+
+        <div class="tjp-input-group">
+            <label asp-for="OriginFarm" class="tjp-label"></label>
+            <input asp-for="OriginFarm" class="tjp-input" />
+        </div>
+
+        <!-- Image Management -->
+        <div style="display: grid; grid-template-columns: 80px 1fr 1fr; gap: 20px; align-items: center; background: var(--bg-surface); padding: 20px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm); margin-bottom: 24px;">
+            <img src="@Model.ImageUrl" alt="Preview" style="width: 70px; height: 70px; border-radius: 6px; object-fit: cover;" onerror="this.src='/images/products/placeholder.jpg'" />
+
+            <div class="tjp-input-group" style="margin-bottom: 0;">
+                <label asp-for="ImageFile" class="tjp-label"></label>
+                <input asp-for="ImageFile" type="file" class="tjp-input" accept="image/*" />
+            </div>
+
+            <div class="tjp-input-group" style="margin-bottom: 0;">
+                <label asp-for="ImageUrl" class="tjp-label">Image Path / URL</label>
+                <input asp-for="ImageUrl" class="tjp-input" />
+            </div>
+        </div>
+
+        <!-- Toggles -->
+        <div style="display: flex; gap: 30px; margin-bottom: 30px;">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600;">
+                <input type="checkbox" asp-for="IsFeatured" style="width: 20px; height: 20px; accent-color: var(--accent-orange);" />
+                <span>Feature on Homepage</span>
+            </label>
+
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600;">
+                <input type="checkbox" asp-for="IsActive" style="width: 20px; height: 20px; accent-color: var(--accent-green);" />
+                <span>Active (Available in Catalog)</span>
+            </label>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <button type="submit" form="deleteProductForm" class="tjp-btn tjp-btn-neu" style="color: var(--danger);" onclick="return confirm('Are you sure you want to delete this product?');">
+                <i class="fa-solid fa-trash-can"></i> Delete Cut
+            </button>
+
+            <div style="display: flex; gap: 14px;">
+                <a asp-action="Products" class="tjp-btn tjp-btn-neu">Cancel</a>
+                <button type="submit" class="tjp-btn tjp-btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+            </div>
+        </div>
+    </form>
+
+    <form id="deleteProductForm" asp-action="DeleteProduct" asp-route-id="@Model.Id" method="post" style="display: none;">
+        @Html.AntiForgeryToken()
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.querySelector('#shortDescInput');
+            const count = document.querySelector('#charCount');
+            if (input && count) {
+                input.addEventListener('input', () => {
+                    count.textContent = `${input.value.length} / 150`;
+                });
+            }
+        });
+    </script>
+}

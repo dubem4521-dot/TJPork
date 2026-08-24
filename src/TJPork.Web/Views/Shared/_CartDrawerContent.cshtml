@@ -1,0 +1,102 @@
+@model TJPork.Core.Models.Cart
+
+@if (Model.Items.Count == 0)
+{
+    <div style="text-align: center; padding: 48px 16px;">
+        <div style="width: 72px; height: 72px; border-radius: var(--radius-full); background: var(--bg-surface); color: var(--text-muted); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.8rem; box-shadow: var(--shadow-raised-sm);">
+            <i class="fa-solid fa-cart-shopping"></i>
+        </div>
+        <h4 style="font-size: 1.15rem; margin-bottom: 8px;">Your cart is empty</h4>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 24px;">Discover our heritage bacon, pasture-raised chops, and handcrafted sausages.</p>
+        <a asp-controller="Shop" asp-action="Index" class="tjp-btn tjp-btn-primary tjp-btn-sm tjp-drawer-close">
+            <i class="fa-solid fa-drumstick-bite"></i> Explore Artisanal Cuts
+        </a>
+    </div>
+}
+else
+{
+    <!-- Free Shipping Progress -->
+    <div style="background: var(--bg-surface); padding: 14px; border-radius: var(--radius-sm); margin-bottom: 20px; box-shadow: var(--shadow-inset-sm);">
+        @if (Model.Subtotal >= 500m)
+        {
+            <div style="display: flex; align-items: center; gap: 8px; color: var(--accent-green); font-size: 0.88rem; font-weight: 600;">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>You unlocked <strong>FREE Delivery</strong>!</span>
+            </div>
+        }
+        else
+        {
+            var needed = 500m - Model.Subtotal;
+            var pct = (int)Math.Min(100, Math.Round((Model.Subtotal / 500m) * 100));
+            <div style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 6px;">
+                Add <strong style="color: var(--accent-orange);">R@(needed.ToString("F2"))</strong> more for Free Delivery
+            </div>
+            <div style="height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden;">
+                <div style="width: @pct%; height: 100%; background: var(--accent-orange); transition: width 0.3s ease;"></div>
+            </div>
+        }
+    </div>
+
+    <!-- Items List -->
+    <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+        @foreach (var item in Model.Items)
+        {
+            <div style="display: flex; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid #F1F5F9; align-items: center;">
+                <img src="@item.ImageUrl" alt="@item.ProductName" style="width: 60px; height: 60px; border-radius: var(--radius-sm); object-fit: cover;" onerror="this.src='/images/products/placeholder.jpg'" />
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-primary);">@item.ProductName</div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px;">R@(item.UnitPrice.ToString("F2")) each</div>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div class="tjp-quantity-stepper">
+                            <button type="button" class="tjp-qty-btn" onclick="updateCartQuantityAjax(@item.ProductId, @(item.Quantity - 1))">-</button>
+                            <span class="tjp-qty-val">@item.Quantity</span>
+                            <button type="button" class="tjp-qty-btn" onclick="updateCartQuantityAjax(@item.ProductId, @(item.Quantity + 1))">+</button>
+                        </div>
+                        <span style="font-weight: 700; font-family: var(--font-mono); color: var(--text-primary); font-size: 0.95rem;">R@(item.TotalPrice.ToString("F2"))</span>
+                    </div>
+                </div>
+                <button type="button" onclick="removeCartItemAjax(@item.ProductId)" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 4px;" title="Remove Item">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- Subtotals & Summary -->
+    <div style="background: var(--bg-surface); padding: 18px; border-radius: var(--radius-md); box-shadow: var(--shadow-raised-sm); margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">
+            <span>Subtotal:</span>
+            <span class="mono" style="font-weight: 600; color: var(--text-primary);">R@(Model.Subtotal.ToString("F2"))</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">
+            <span>Estimated Delivery:</span>
+            <span class="mono">@(Model.DeliveryFee == 0 ? "FREE" : "R" + Model.DeliveryFee.ToString("F2"))</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">
+            <span>VAT (15%):</span>
+            <span class="mono">R@(Model.TaxAmount.ToString("F2"))</span>
+        </div>
+        @if (Model.DiscountAmount > 0)
+        {
+            <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--accent-green); margin-bottom: 8px;">
+                <span>Discount:</span>
+                <span class="mono">-R@(Model.DiscountAmount.ToString("F2"))</span>
+            </div>
+        }
+        <div style="display: flex; justify-content: space-between; font-size: 1.15rem; font-weight: 700; color: var(--text-primary); border-top: 1px solid #E2E8F0; padding-top: 12px; margin-top: 10px;">
+            <span>Total:</span>
+            <span class="mono" style="color: var(--accent-orange);">R@(Model.Total.ToString("F2"))</span>
+        </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+        <a asp-controller="Checkout" asp-action="Index" class="tjp-btn tjp-btn-primary" style="width: 100%; font-size: 1.05rem;">
+            <span>Proceed to Checkout</span>
+            <i class="fa-solid fa-arrow-right"></i>
+        </a>
+        <a asp-controller="Cart" asp-action="Index" class="tjp-btn tjp-btn-neu" style="width: 100%;">
+            View Full Cart
+        </a>
+    </div>
+}

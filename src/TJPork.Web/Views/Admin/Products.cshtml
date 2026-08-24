@@ -1,0 +1,152 @@
+@model TJPork.Web.ViewModels.AdminProductListViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Product Management (CRUD)";
+}
+
+<!-- Top Action Header -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div>
+        <p style="color: var(--text-secondary); margin: 0;">Manage catalogue cuts, inventory stock levels, prices, and featured items.</p>
+    </div>
+    <a asp-action="CreateProduct" class="tjp-btn tjp-btn-primary">
+        <i class="fa-solid fa-plus"></i> Add New Pork Cut
+    </a>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="tjp-card" style="padding: 18px 24px; margin-bottom: 24px;">
+    <form method="get" asp-action="Products" style="display: flex; gap: 16px; flex-wrap: wrap; align-items: center;">
+        <div style="flex: 1; min-width: 240px;">
+            <input type="text" name="search" value="@Model.Search" class="tjp-input" placeholder="Search by cut name or keywords..." style="padding: 8px 14px;" />
+        </div>
+
+        <div style="min-width: 180px;">
+            <select name="categoryId" class="tjp-select" style="padding: 8px 14px;">
+                <option value="">All Categories</option>
+                @foreach (var cat in Model.Categories)
+                {
+                    <option value="@cat.Id" selected="@(Model.CategoryId == cat.Id)">@cat.Name</option>
+                }
+            </select>
+        </div>
+
+        <div style="min-width: 160px;">
+            <select name="status" class="tjp-select" style="padding: 8px 14px;">
+                <option value="all" selected="@(Model.StatusFilter == "all")">All Statuses</option>
+                <option value="active" selected="@(Model.StatusFilter == "active")">Active Only</option>
+                <option value="inactive" selected="@(Model.StatusFilter == "inactive")">Inactive Only</option>
+                <option value="lowstock" selected="@(Model.StatusFilter == "lowstock")">Low Stock (&le; 10)</option>
+            </select>
+        </div>
+
+        <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm"><i class="fa-solid fa-filter"></i> Filter</button>
+        <a asp-action="Products" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="color: var(--text-muted);">Reset</a>
+    </form>
+</div>
+
+<!-- Bulk Actions & Products Table -->
+<form id="bulkActionForm" asp-action="BulkProductAction" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="tjp-card" style="padding: 0; overflow: hidden;">
+        <!-- Bulk Controls Bar -->
+        <div style="padding: 14px 24px; background: var(--bg-surface); border-bottom: 1px solid #EEF2F6; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <select name="actionType" id="bulkActionSelect" class="tjp-select" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
+                    <option value="">Bulk Actions...</option>
+                    <option value="activate">Activate Selected</option>
+                    <option value="deactivate">Deactivate Selected</option>
+                    <option value="adjustPrice">Adjust Price (% Change)</option>
+                    <option value="changeCategory">Change Category</option>
+                    <option value="delete">Delete Selected</option>
+                </select>
+
+                <input type="number" name="priceAdjustPercent" id="bulkPriceAdjustInput" placeholder="e.g. 10 or -10" class="tjp-input" style="display: none; width: 120px; padding: 6px 10px; font-size: 0.85rem;" />
+
+                <select name="newCategoryId" id="bulkCategorySelect" class="tjp-select" style="display: none; width: auto; padding: 6px 12px; font-size: 0.85rem;">
+                    @foreach (var cat in Model.Categories)
+                    {
+                        <option value="@cat.Id">@cat.Name</option>
+                    }
+                </select>
+
+                <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm">Apply to Selected</button>
+            </div>
+
+            <span style="font-size: 0.85rem; color: var(--text-muted);">@Model.Products.Count Total Products</span>
+        </div>
+
+        <!-- Table -->
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+                <thead>
+                    <tr style="background: #FFFFFF; border-bottom: 1px solid #EEF2F6; color: var(--text-secondary); font-size: 0.82rem;">
+                        <th style="padding: 12px 18px; width: 40px;">
+                            <input type="checkbox" id="selectAllProducts" style="accent-color: var(--accent-orange);" />
+                        </th>
+                        <th style="padding: 12px 18px;">Product</th>
+                        <th style="padding: 12px 18px;">Category</th>
+                        <th style="padding: 12px 18px;">Price</th>
+                        <th style="padding: 12px 18px;">Stock</th>
+                        <th style="padding: 12px 18px;">Status</th>
+                        <th style="padding: 12px 18px;">Featured</th>
+                        <th style="padding: 12px 18px; text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Products)
+                    {
+                        <tr style="border-bottom: 1px solid #F1F5F9;">
+                            <td style="padding: 12px 18px;">
+                                <input type="checkbox" name="selectedIds" value="@item.Id" class="product-checkbox" style="accent-color: var(--accent-orange);" />
+                            </td>
+                            <td style="padding: 12px 18px; display: flex; align-items: center; gap: 12px;">
+                                <img src="@item.ImageUrl" alt="@item.Name" style="width: 44px; height: 44px; border-radius: 6px; object-fit: cover;" onerror="this.src='/images/products/placeholder.jpg'" />
+                                <div>
+                                    <strong style="color: var(--text-primary); display: block;">@item.Name</strong>
+                                    <span style="font-size: 0.78rem; color: var(--text-muted);">@item.WeightDescription</span>
+                                </div>
+                            </td>
+                            <td style="padding: 12px 18px; color: var(--text-secondary);">@(item.Category?.Name ?? "Uncategorized")</td>
+                            <td style="padding: 12px 18px;" class="mono">
+                                <strong style="color: var(--accent-orange);">R@(item.FinalPrice.ToString("F2"))</strong>
+                                @if (item.DiscountPercentage > 0)
+                                {
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); text-decoration: line-through; display: block;">R@(item.Price.ToString("F2"))</span>
+                                }
+                            </td>
+                            <td style="padding: 12px 18px;">
+                                <span class="mono" style="font-weight: 700; color: @(item.StockQuantity <= 10 ? "var(--danger)" : "var(--text-primary)");">
+                                    @item.StockQuantity units
+                                </span>
+                            </td>
+                            <td style="padding: 12px 18px;">
+                                <span class="tjp-badge" style="position: static; font-size: 0.75rem; background: @(item.IsActive ? "var(--accent-green)" : "#94A3B8");">
+                                    @(item.IsActive ? "Active" : "Inactive")
+                                </span>
+                            </td>
+                            <td style="padding: 12px 18px;">
+                                @if (item.IsFeatured)
+                                {
+                                    <span style="color: #F1C40F; font-size: 1rem;" title="Featured on Homepage"><i class="fa-solid fa-star"></i></span>
+                                }
+                                else
+                                {
+                                    <span style="color: #CBD5E1; font-size: 1rem;"><i class="fa-regular fa-star"></i></span>
+                                }
+                            </td>
+                            <td style="padding: 12px 18px; text-align: right;">
+                                <div style="display: inline-flex; gap: 8px;">
+                                    <a asp-action="EditProduct" asp-route-id="@item.Id" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="padding: 6px 10px;" title="Edit Product">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>

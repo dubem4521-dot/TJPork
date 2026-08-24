@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" width="100%" height="100%">
+  <rect width="400" height="500" fill="#F4F7F9"/>
+  <circle cx="200" cy="180" r="90" fill="#E67E22"/>
+  <text x="200" y="195" font-family="Inter, sans-serif" font-size="48" font-weight="bold" fill="#FFFFFF" text-anchor="middle">J</text>
+  <text x="200" y="340" font-family="Inter, sans-serif" font-size="28" font-weight="bold" fill="#2C3E50" text-anchor="middle">Jeffery</text>
+  <text x="200" y="380" font-family="Inter, sans-serif" font-size="16" font-weight="500" fill="#E67E22" text-anchor="middle">Co-Founder & Master Curer</text>
+  <rect x="120" y="415" width="160" height="4" rx="2" fill="#E2E8F0" />
+</svg>

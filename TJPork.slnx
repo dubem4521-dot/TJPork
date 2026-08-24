@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TJPork.Core/TJPork.Core.csproj" />
+    <Project Path="src/TJPork.Infrastructure/TJPork.Infrastructure.csproj" />
+    <Project Path="src/TJPork.Web/TJPork.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/TJPork.Tests/TJPork.Tests.csproj" />
+  </Folder>
+</Solution>

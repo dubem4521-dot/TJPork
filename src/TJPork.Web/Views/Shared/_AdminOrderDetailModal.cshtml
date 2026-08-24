@@ -1,0 +1,115 @@
+@model TJPork.Core.Entities.Order
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+    <!-- Customer Details -->
+    <div style="background: var(--bg-surface); padding: 18px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm);">
+        <h4 style="font-size: 1rem; margin-bottom: 12px; color: var(--text-primary);"><i class="fa-solid fa-user" style="color: var(--accent-orange); margin-right: 6px;"></i> Customer Information</h4>
+        <p style="margin-bottom: 4px;"><strong>Name:</strong> @Model.CustomerName</p>
+        <p style="margin-bottom: 4px;"><strong>Email:</strong> <a href="mailto:@Model.CustomerEmail" style="color: var(--accent-orange);">@Model.CustomerEmail</a></p>
+        <p style="margin-bottom: 4px;"><strong>Phone:</strong> @Model.CustomerPhone</p>
+        <p style="margin-bottom: 4px;"><strong>Placed:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy HH:mm") UTC</p>
+    </div>
+
+    <!-- Delivery & Fulfillment -->
+    <div style="background: var(--bg-surface); padding: 18px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm);">
+        <h4 style="font-size: 1rem; margin-bottom: 12px; color: var(--text-primary);"><i class="fa-solid fa-truck" style="color: var(--accent-green); margin-right: 6px;"></i> Delivery Address</h4>
+        <p style="margin-bottom: 4px;"><strong>Address:</strong> @Model.ShippingAddress</p>
+        <p style="margin-bottom: 4px;"><strong>City / Zip:</strong> @Model.City, @Model.PostalCode</p>
+        <p style="margin-bottom: 4px;"><strong>Preferred Time:</strong> @Model.DeliveryDate.ToString("MMM dd, yyyy") (@Model.DeliverySlot)</p>
+        @if (!string.IsNullOrEmpty(Model.SpecialInstructions))
+        {
+            <p style="margin-top: 6px; font-size: 0.85rem; color: var(--text-secondary); background: #FFFFFF; padding: 6px 10px; border-radius: 4px;">
+                <strong>Note:</strong> @Model.SpecialInstructions
+            </p>
+        }
+    </div>
+</div>
+
+<!-- Order Items Table -->
+<h4 style="font-size: 1.05rem; margin-bottom: 12px; color: var(--text-primary);"><i class="fa-solid fa-box-open" style="color: var(--accent-orange); margin-right: 6px;"></i> Purchased Items</h4>
+<div style="background: #FFFFFF; border-radius: var(--radius-sm); border: 1px solid #EEF2F6; overflow: hidden; margin-bottom: 20px;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="background: var(--bg-surface); color: var(--text-secondary); font-size: 0.85rem;">
+                <th style="padding: 10px 14px;">Product</th>
+                <th style="padding: 10px 14px;">Unit Price</th>
+                <th style="padding: 10px 14px;">Quantity</th>
+                <th style="padding: 10px 14px; text-align: right;">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr style="border-bottom: 1px solid #F1F5F9; font-size: 0.9rem;">
+                    <td style="padding: 12px 14px; display: flex; align-items: center; gap: 10px;">
+                        <img src="@item.ProductImageUrl" alt="@item.ProductName" style="width: 40px; height: 40px; border-radius: 4px; object-fit: cover;" onerror="this.src='/images/products/placeholder.jpg'" />
+                        <span style="font-weight: 600;">@item.ProductName</span>
+                    </td>
+                    <td style="padding: 12px 14px;" class="mono">R@(item.UnitPrice.ToString("F2"))</td>
+                    <td style="padding: 12px 14px;">@item.Quantity</td>
+                    <td style="padding: 12px 14px; text-align: right; font-weight: 700;" class="mono">R@(item.TotalPrice.ToString("F2"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Financial Summary -->
+<div style="background: var(--bg-surface); padding: 18px; border-radius: var(--radius-md); box-shadow: var(--shadow-raised-sm); margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
+        <span>Subtotal:</span>
+        <span class="mono">R@(Model.Subtotal.ToString("F2"))</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
+        <span>Delivery Fee:</span>
+        <span class="mono">R@(Model.DeliveryFee.ToString("F2"))</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px;">
+        <span>VAT (15%):</span>
+        <span class="mono">R@(Model.TaxAmount.ToString("F2"))</span>
+    </div>
+    @if (Model.DiscountAmount > 0)
+    {
+        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--accent-green); margin-bottom: 6px;">
+            <span>Discount Applied:</span>
+            <span class="mono">-R@(Model.DiscountAmount.ToString("F2"))</span>
+        </div>
+    }
+    <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800; border-top: 1px solid #E2E8F0; padding-top: 10px; margin-top: 8px;">
+        <span>Total Order Value:</span>
+        <span class="mono" style="color: var(--accent-orange);">R@(Model.TotalAmount.ToString("F2"))</span>
+    </div>
+</div>
+
+<!-- Status Modification Controls -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+    <form asp-controller="Admin" asp-action="UpdateOrderStatus" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="orderId" value="@Model.Id" />
+        <label class="tjp-label">Fulfillment / Delivery Status</label>
+        <div style="display: flex; gap: 8px;">
+            <select name="status" class="tjp-select" style="flex: 1;">
+                @foreach (var s in Enum.GetValues<TJPork.Core.Enums.OrderStatus>())
+                {
+                    <option value="@s" selected="@(Model.DeliveryStatus == s)">@s</option>
+                }
+            </select>
+            <button type="submit" class="tjp-btn tjp-btn-primary tjp-btn-sm">Update</button>
+        </div>
+    </form>
+
+    <form asp-controller="Admin" asp-action="UpdateOrderPaymentStatus" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="orderId" value="@Model.Id" />
+        <label class="tjp-label">Payment Status (@Model.PaymentMethod)</label>
+        <div style="display: flex; gap: 8px;">
+            <select name="status" class="tjp-select" style="flex: 1;">
+                @foreach (var p in Enum.GetValues<TJPork.Core.Enums.PaymentStatus>())
+                {
+                    <option value="@p" selected="@(Model.PaymentStatus == p)">@p</option>
+                }
+            </select>
+            <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm">Update</button>
+        </div>
+    </form>
+</div>

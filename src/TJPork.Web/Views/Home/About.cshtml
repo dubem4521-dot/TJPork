@@ -1,0 +1,102 @@
+@model TJPork.Web.ViewModels.AboutViewModel
+@{
+    ViewData["Title"] = "About Tinashe & Jeffery | Our Artisanal Journey";
+}
+
+<div class="container" style="margin-top: 110px; margin-bottom: 80px;">
+    <!-- Header Banner -->
+    <div style="text-align: center; max-width: 780px; margin: 0 auto 56px;">
+        <span style="color: var(--accent-orange); font-weight: 700; font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.06em;">The Artisanal Standard</span>
+        <h1 style="font-size: 2.8rem; margin: 8px 0 16px;">Two Founders. One Passion for Premium Pork.</h1>
+        <p style="font-size: 1.1rem; color: var(--text-secondary); line-height: 1.7;">
+            T&amp;JPork was born out of frustration with industrial supermarket pork—watery cuts, bland flavor, and questionable farm practices. Tinashe and Jeffery set out to restore heritage pork to its rightful glory.
+        </p>
+    </div>
+
+    <!-- Two-Column Founders Showcase -->
+    <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 36px; margin-bottom: 64px;">
+        <!-- Left: Tinashe -->
+        <div class="tjp-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 36px 28px;">
+            <div style="width: 140px; height: 140px; border-radius: var(--radius-full); overflow: hidden; border: 4px solid var(--bg-surface); box-shadow: var(--shadow-raised-sm); margin-bottom: 20px;">
+                <img src="/images/about/tinashe.jpg" alt="Tinashe" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/images/avatars/default.png'" />
+            </div>
+            <h2 style="font-size: 1.6rem; margin-bottom: 4px;">Tinashe</h2>
+            <span style="color: var(--accent-orange); font-weight: 600; font-size: 0.95rem; margin-bottom: 18px;">Co-Founder &amp; Head of Ethical Sourcing</span>
+            <p style="color: var(--text-secondary); line-height: 1.65; font-size: 0.95rem; margin-bottom: 20px;">
+                @Model.TinasheBio
+            </p>
+            <div style="margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <span class="tjp-chip" style="font-size: 0.8rem;"><i class="fa-solid fa-seedling" style="color: var(--accent-green);"></i> Pasture Genetics</span>
+                <span class="tjp-chip" style="font-size: 0.8rem;"><i class="fa-solid fa-handshake" style="color: var(--accent-orange);"></i> Farm Direct</span>
+            </div>
+        </div>
+
+        <!-- Right: Jeffery -->
+        <div class="tjp-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 36px 28px;">
+            <div style="width: 140px; height: 140px; border-radius: var(--radius-full); overflow: hidden; border: 4px solid var(--bg-surface); box-shadow: var(--shadow-raised-sm); margin-bottom: 20px;">
+                <img src="/images/about/jeffery.jpg" alt="Jeffery" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/images/avatars/default.png'" />
+            </div>
+            <h2 style="font-size: 1.6rem; margin-bottom: 4px;">Jeffery</h2>
+            <span style="color: var(--accent-orange); font-weight: 600; font-size: 0.95rem; margin-bottom: 18px;">Co-Founder &amp; Master Charcutier</span>
+            <p style="color: var(--text-secondary); line-height: 1.65; font-size: 0.95rem; margin-bottom: 20px;">
+                @Model.JefferyBio
+            </p>
+            <div style="margin-top: auto; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                <span class="tjp-chip" style="font-size: 0.8rem;"><i class="fa-solid fa-fire" style="color: var(--accent-orange);"></i> Hardwood Smoke</span>
+                <span class="tjp-chip" style="font-size: 0.8rem;"><i class="fa-solid fa-mortar-pestle" style="color: #3498DB;"></i> Small-Batch Spices</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Company Values Section -->
+    <section style="background: #FFFFFF; border-radius: var(--radius-lg); box-shadow: var(--shadow-raised); padding: 48px; border: 1px solid rgba(255,255,255,0.9); margin-bottom: 64px;">
+        <div style="text-align: center; max-width: 600px; margin: 0 auto 40px;">
+            <span style="color: var(--accent-orange); font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">Our Core Values</span>
+            <h2 style="font-size: 2.2rem; margin-top: 6px;">How We Do Things Differently</h2>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 30px;">
+            <div style="background: var(--bg-surface); padding: 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm);">
+                <div style="width: 50px; height: 50px; border-radius: var(--radius-sm); background: var(--accent-orange); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 16px;">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 8px;">1. Heritage Quality Sourcing</h3>
+                <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6;">
+                    We exclusively partner with farms raising pure Berkshire, Duroc, and Red Wattle hogs with deep red meat color and natural intra-muscular marbling.
+                </p>
+            </div>
+
+            <div style="background: var(--bg-surface); padding: 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm);">
+                <div style="width: 50px; height: 50px; border-radius: var(--radius-sm); background: var(--accent-green); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 16px;">
+                    <i class="fa-solid fa-earth-americas"></i>
+                </div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 8px;">2. 100% Sustainable Practices</h3>
+                <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6;">
+                    Rotational grazing, zero preventative antibiotics, non-GMO forage, and whole-animal butcher philosophy to eliminate waste.
+                </p>
+            </div>
+
+            <div style="background: var(--bg-surface); padding: 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm);">
+                <div style="width: 50px; height: 50px; border-radius: var(--radius-sm); background: #3498DB; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 16px;">
+                    <i class="fa-solid fa-users-gear"></i>
+                </div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 8px;">3. Community Commitment</h3>
+                <p style="color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6;">
+                    Supporting local family-owned butcheries and farm co-ops. A percentage of all seasonal proceeds supports regional agricultural apprenticeships.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission & Timeline -->
+    <section style="text-align: center; max-width: 800px; margin: 0 auto;">
+        <div class="tjp-card" style="padding: 40px; background: linear-gradient(135deg, #2C3E50, #1A252F); color: #FFFFFF;">
+            <span style="color: var(--accent-orange); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">Our Mission</span>
+            <h2 style="font-size: 2rem; color: #FFFFFF; margin: 10px 0 16px;">To Deliver Unrivaled Pork Excellence</h2>
+            <p style="color: #CBD5E1; line-height: 1.7; font-size: 1.05rem; margin-bottom: 24px;">
+                "Every cut that leaves our smokehouse represents our names and our reputation. If you don't taste the difference in the first bite, we will make it right."
+            </p>
+            <div style="font-weight: 700; font-size: 1rem; color: var(--accent-orange);">&mdash; Tinashe &amp; Jeffery</div>
+        </div>
+    </section>
+</div>

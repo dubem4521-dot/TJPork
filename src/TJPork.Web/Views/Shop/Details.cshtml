@@ -1,0 +1,208 @@
+@model TJPork.Web.ViewModels.ProductDetailViewModel
+@{
+    ViewData["Title"] = $"{Model.Product.Name} - Artisanal Pork";
+}
+
+<div class="container" style="margin-top: 110px; margin-bottom: 80px;">
+    <!-- Breadcrumb -->
+    <nav style="display: flex; gap: 8px; align-items: center; font-size: 0.88rem; color: var(--text-muted); margin-bottom: 24px;">
+        <a asp-controller="Home" asp-action="Index">Home</a>
+        <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
+        <a asp-controller="Shop" asp-action="Index">Catalog</a>
+        <i class="fa-solid fa-chevron-right" style="font-size: 0.7rem;"></i>
+        <span style="color: var(--text-primary); font-weight: 600;">@Model.Product.Name</span>
+    </nav>
+
+    <!-- Product Top Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 48px; margin-bottom: 60px;">
+        <!-- Left: Product Image -->
+        <div class="tjp-card" style="padding: 16px; display: flex; align-items: center; justify-content: center; background: #FFFFFF;">
+            <img src="@Model.Product.ImageUrl" alt="@Model.Product.Name" style="width: 100%; max-height: 440px; object-fit: cover; border-radius: var(--radius-md);" onerror="this.src='/images/products/placeholder.jpg'" />
+        </div>
+
+        <!-- Right: Details & Purchase Card -->
+        <div style="display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                <span class="tjp-chip" style="background: var(--bg-surface);"><i class="@(Model.Product.Category?.IconClass ?? "fa-solid fa-drumstick-bite")"></i> @(Model.Product.Category?.Name ?? "Pork")</span>
+                @if (Model.Product.DiscountPercentage > 0)
+                {
+                    <span class="tjp-discount-badge" style="position: static;">-@Model.Product.DiscountPercentage% OFF</span>
+                }
+            </div>
+
+            <h1 style="font-size: 2.3rem; margin-bottom: 12px; line-height: 1.2;">@Model.Product.Name</h1>
+
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px;">
+                <div class="tjp-rating" style="font-size: 1.05rem;">
+                    <i class="fa-solid fa-star"></i>
+                    <span style="font-weight: 700; color: var(--text-primary);">@Model.Product.Rating.ToString("F1")</span>
+                </div>
+                <span style="color: var(--text-muted);">&bull;</span>
+                <span style="color: var(--text-secondary); font-size: 0.9rem;">@Model.Product.ReviewCount Verified Customer Reviews</span>
+            </div>
+
+            <!-- Price -->
+            <div style="display: flex; align-items: baseline; gap: 14px; margin-bottom: 24px; padding: 16px 20px; background: var(--bg-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm); width: fit-content;">
+                <span class="mono" style="font-size: 2rem; font-weight: 800; color: var(--accent-orange);">R@(Model.Product.FinalPrice.ToString("F2"))</span>
+                @if (Model.Product.DiscountPercentage > 0)
+                {
+                    <span class="mono" style="font-size: 1.2rem; color: var(--text-muted); text-decoration: line-through;">R@(Model.Product.Price.ToString("F2"))</span>
+                }
+                <span style="color: var(--text-secondary); font-size: 0.88rem;">/ @Model.Product.WeightDescription</span>
+            </div>
+
+            <p style="color: var(--text-secondary); font-size: 1.05rem; line-height: 1.65; margin-bottom: 28px;">
+                @Model.Product.ShortDescription
+            </p>
+
+            <!-- Quantity & Add to Cart -->
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 32px; flex-wrap: wrap;">
+                <div class="tjp-quantity-stepper" style="padding: 6px 12px;">
+                    <button type="button" class="tjp-qty-btn" id="detailsQtyMinus" style="font-size: 1.1rem; width: 34px; height: 34px;">-</button>
+                    <span class="tjp-qty-val" id="detailsQtyVal" style="font-size: 1.1rem; min-width: 44px;">1</span>
+                    <button type="button" class="tjp-qty-btn" id="detailsQtyPlus" style="font-size: 1.1rem; width: 34px; height: 34px;">+</button>
+                </div>
+
+                @if (Model.Product.StockQuantity > 0)
+                {
+                    <button type="button" id="detailsAddToCartBtn" class="tjp-btn tjp-btn-primary tjp-btn-lg" style="flex: 1; min-width: 200px;">
+                        <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+                    </button>
+                }
+                else
+                {
+                    <button type="button" class="tjp-btn tjp-btn-neu tjp-btn-lg" disabled style="opacity: 0.6; cursor: not-allowed;">
+                        Out of Stock
+                    </button>
+                }
+            </div>
+
+            <!-- Butcher Specs Box -->
+            <div class="tjp-card" style="padding: 20px; box-shadow: var(--shadow-raised-sm); display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                    <span style="color: var(--text-secondary);"><i class="fa-solid fa-fire" style="color: var(--accent-orange); margin-right: 6px;"></i> Curing &amp; Aging:</span>
+                    <span style="font-weight: 600;">@Model.Product.CuringMethod</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                    <span style="color: var(--text-secondary);"><i class="fa-solid fa-house-flag" style="color: var(--accent-green); margin-right: 6px;"></i> Origin Farm:</span>
+                    <span style="font-weight: 600;">@Model.Product.OriginFarm</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.9rem;">
+                    <span style="color: var(--text-secondary);"><i class="fa-solid fa-cubes-stacked" style="color: #3498DB; margin-right: 6px;"></i> Fresh Availability:</span>
+                    <span style="font-weight: 600; color: @(Model.Product.StockQuantity > 5 ? "var(--accent-green)" : "var(--accent-orange)");">
+                        @(Model.Product.StockQuantity > 0 ? $"{Model.Product.StockQuantity} packs available" : "Sold Out")
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Long Description & Culinary Notes -->
+    <div class="tjp-card" style="padding: 36px; margin-bottom: 60px;">
+        <h3 style="font-size: 1.5rem; margin-bottom: 16px; border-bottom: 1px solid #EEF2F6; padding-bottom: 12px;">
+            <i class="fa-solid fa-circle-info" style="color: var(--accent-orange); margin-right: 8px;"></i> Master Butcher Notes &amp; Preparation Guide
+        </h3>
+        <div style="color: var(--text-secondary); font-size: 1.02rem; line-height: 1.8;">
+            <p style="margin-bottom: 16px;">@Model.Product.LongDescription</p>
+            <p>
+                <strong>Chef's Cooking Tip:</strong> Bring this cut to room temperature 15 minutes before cooking. For thick heritage chops and pork belly, maintain moderate pan heat to render the delicious fat cap until golden-crisp.
+            </p>
+        </div>
+    </div>
+
+    <!-- Customer Reviews for this Product -->
+    <div style="margin-bottom: 60px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <h3 style="font-size: 1.8rem; margin: 0;">Customer Reviews (@Model.Product.ReviewCount)</h3>
+                <p style="color: var(--text-secondary); font-size: 0.95rem; margin-top: 4px;">Verified culinary impressions from our smokehouse community.</p>
+            </div>
+            <button type="button" class="tjp-btn tjp-btn-primary tjp-write-review-btn" data-product-id="@Model.Product.Id" data-product-name="@Model.Product.Name">
+                <i class="fa-solid fa-pen-to-square"></i> Review this Cut
+            </button>
+        </div>
+
+        @if (!Model.Product.Reviews.Any())
+        {
+            <div class="tjp-card" style="text-align: center; padding: 40px;">
+                <p style="color: var(--text-muted); margin-bottom: 16px;">Be the first to review this heritage pork cut!</p>
+                <button type="button" class="tjp-btn tjp-btn-neu tjp-btn-sm tjp-write-review-btn" data-product-id="@Model.Product.Id" data-product-name="@Model.Product.Name">
+                    Write First Review
+                </button>
+            </div>
+        }
+        else
+        {
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                @foreach (var rev in Model.Product.Reviews.OrderByDescending(r => r.CreatedAt))
+                {
+                    <div class="tjp-card" style="box-shadow: var(--shadow-raised-sm); background: var(--bg-surface);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div style="color: #F1C40F; font-size: 0.9rem;">
+                                @for (int s = 1; s <= 5; s++)
+                                {
+                                    <i class="fa-solid fa-star" style="@(s <= rev.Rating ? "" : "color: #CBD5E1;")"></i>
+                                }
+                            </div>
+                            <span style="font-size: 0.75rem; color: var(--accent-green); font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                        </div>
+                        <h4 style="font-size: 1rem; margin-bottom: 6px;">@rev.Title</h4>
+                        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 14px;">@rev.Comment</p>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid rgba(218,225,233,0.6); padding-top: 8px;">
+                            <strong>@rev.CustomerName</strong> &bull; @rev.CreatedAt.ToString("MMM dd, yyyy")
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Related Products -->
+    @if (Model.RelatedProducts.Any())
+    {
+        <div>
+            <h3 style="font-size: 1.8rem; margin-bottom: 24px;">You May Also Enjoy</h3>
+            <div class="grid-products">
+                @foreach (var rel in Model.RelatedProducts)
+                {
+                    <partial name="_ProductCard" model="rel" />
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let currentQty = 1;
+            const maxStock = @Model.Product.StockQuantity;
+            const qtyValElem = document.querySelector('#detailsQtyVal');
+            const plusBtn = document.querySelector('#detailsQtyPlus');
+            const minusBtn = document.querySelector('#detailsQtyMinus');
+            const addBtn = document.querySelector('#detailsAddToCartBtn');
+
+            if (plusBtn && minusBtn && qtyValElem) {
+                plusBtn.addEventListener('click', () => {
+                    if (currentQty < maxStock) {
+                        currentQty++;
+                        qtyValElem.textContent = currentQty;
+                    }
+                });
+
+                minusBtn.addEventListener('click', () => {
+                    if (currentQty > 1) {
+                        currentQty--;
+                        qtyValElem.textContent = currentQty;
+                    }
+                });
+            }
+
+            if (addBtn) {
+                addBtn.addEventListener('click', function () {
+                    addToCartAjax(@Model.Product.Id, currentQty, addBtn);
+                });
+            }
+        });
+    </script>
+}

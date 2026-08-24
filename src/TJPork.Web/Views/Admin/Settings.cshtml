@@ -1,0 +1,85 @@
+@model TJPork.Web.ViewModels.AdminSettingsViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Store & Notification Settings";
+}
+
+<div class="tjp-card" style="max-width: 760px; margin: 0 auto; padding: 36px;">
+    <div style="margin-bottom: 24px; border-bottom: 1px solid #EEF2F6; padding-bottom: 14px;">
+        <h2 style="font-size: 1.5rem; margin-bottom: 4px;">Store Configuration</h2>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">Configure store profile, delivery thresholds, taxes, and owner notification recipients.</p>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div style="padding: 14px 20px; background: var(--accent-green-light); color: var(--accent-green); border-radius: var(--radius-md); border-left: 5px solid var(--accent-green); margin-bottom: 24px; font-weight: 600;">
+            <i class="fa-solid fa-circle-check"></i> @Model.SuccessMessage
+        </div>
+    }
+
+    <form asp-action="Settings" method="post">
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly" style="color: var(--danger); font-size: 0.88rem; margin-bottom: 16px;"></div>
+
+        <!-- Section 1: General Info -->
+        <h3 style="font-size: 1.15rem; margin-bottom: 16px; color: var(--text-primary);"><i class="fa-solid fa-store" style="color: var(--accent-orange); margin-right: 8px;"></i> General Store Details</h3>
+
+        <div class="tjp-input-group">
+            <label asp-for="StoreName" class="tjp-label"></label>
+            <input asp-for="StoreName" class="tjp-input" />
+            <span asp-validation-for="StoreName" style="color: var(--danger); font-size: 0.8rem;"></span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="tjp-input-group">
+                <label asp-for="ContactEmail" class="tjp-label"></label>
+                <input asp-for="ContactEmail" class="tjp-input" />
+                <span asp-validation-for="ContactEmail" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+
+            <div class="tjp-input-group">
+                <label asp-for="ContactPhone" class="tjp-label"></label>
+                <input asp-for="ContactPhone" class="tjp-input" />
+                <span asp-validation-for="ContactPhone" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+        </div>
+
+        <!-- Section 2: Delivery & Shipping -->
+        <h3 style="font-size: 1.15rem; margin: 24px 0 16px; color: var(--text-primary);"><i class="fa-solid fa-truck" style="color: var(--accent-green); margin-right: 8px;"></i> Delivery &amp; Shipping Rates</h3>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="tjp-input-group">
+                <label asp-for="StandardDeliveryFee" class="tjp-label"></label>
+                <input asp-for="StandardDeliveryFee" type="number" step="0.01" class="tjp-input" />
+                <span asp-validation-for="StandardDeliveryFee" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+
+            <div class="tjp-input-group">
+                <label asp-for="FreeDeliveryThreshold" class="tjp-label"></label>
+                <input asp-for="FreeDeliveryThreshold" type="number" step="0.01" class="tjp-input" />
+                <span asp-validation-for="FreeDeliveryThreshold" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+        </div>
+
+        <!-- Section 3: Taxes -->
+        <h3 style="font-size: 1.15rem; margin: 24px 0 16px; color: var(--text-primary);"><i class="fa-solid fa-percent" style="color: #3498DB; margin-right: 8px;"></i> Taxation</h3>
+
+        <div class="tjp-input-group">
+            <label asp-for="TaxRatePercentage" class="tjp-label"></label>
+            <input asp-for="TaxRatePercentage" type="number" step="0.1" class="tjp-input" />
+            <span asp-validation-for="TaxRatePercentage" style="color: var(--danger); font-size: 0.8rem;"></span>
+        </div>
+
+        <!-- Section 4: Notifications -->
+        <h3 style="font-size: 1.15rem; margin: 24px 0 16px; color: var(--text-primary);"><i class="fa-solid fa-bell" style="color: #F1C40F; margin-right: 8px;"></i> Owner Notification Routing</h3>
+
+        <div class="tjp-input-group">
+            <label asp-for="AdminNotifyEmails" class="tjp-label"></label>
+            <input asp-for="AdminNotifyEmails" class="tjp-input" placeholder="tinashe@tjfork.com,jeffery@tjfork.com" />
+            <span style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-top: 4px;">Orders placed online will automatically send instant email alerts to these addresses.</span>
+        </div>
+
+        <button type="submit" class="tjp-btn tjp-btn-primary" style="margin-top: 16px;"><i class="fa-solid fa-floppy-disk"></i> Save Store Settings</button>
+    </form>
+</div>

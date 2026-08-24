@@ -1,0 +1,62 @@
+@model TJPork.Web.ViewModels.AdminLoginViewModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Owner Dashboard Login - T&amp;JPork</title>
+    <!-- FontAwesome 6 (No emojis) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/neumorphism.css" asp-append-version="true" />
+</head>
+<body style="background: #2C3E50; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;">
+    <div class="tjp-card" style="max-width: 440px; width: 100%; padding: 40px; background: #FFFFFF; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+        <div style="text-align: center; margin-bottom: 28px;">
+            <div style="width: 64px; height: 64px; border-radius: var(--radius-md); background: var(--accent-orange); color: #FFFFFF; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.8rem; box-shadow: 0 4px 12px rgba(230,126,34,0.4);">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h1 style="font-size: 1.8rem; margin-bottom: 6px; color: var(--text-primary);">Owner Administration</h1>
+            <p style="color: var(--text-secondary); font-size: 0.88rem;">Restricted to Tinashe &amp; Jeffery</p>
+        </div>
+
+        <form asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="ReturnUrl" />
+
+            <div asp-validation-summary="ModelOnly" style="color: var(--danger); font-size: 0.88rem; margin-bottom: 16px; background: var(--danger-light); padding: 10px 14px; border-radius: 6px;"></div>
+
+            <div class="tjp-input-group">
+                <label asp-for="Email" class="tjp-label">Owner Email</label>
+                <input asp-for="Email" class="tjp-input" placeholder="tinashe@tjfork.com or jeffery@tjfork.com" />
+                <span asp-validation-for="Email" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+
+            <div class="tjp-input-group">
+                <label asp-for="Password" class="tjp-label">Owner Password</label>
+                <input asp-for="Password" class="tjp-input" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" />
+                <span asp-validation-for="Password" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.88rem; color: var(--text-secondary);">
+                    <input type="checkbox" asp-for="RememberMe" style="accent-color: var(--accent-orange);" />
+                    <span>Keep owner session active</span>
+                </label>
+            </div>
+
+            <button type="submit" class="tjp-btn tjp-btn-primary" style="width: 100%; font-size: 1.05rem;">
+                <i class="fa-solid fa-shield-halved"></i> Access Dashboard
+            </button>
+        </form>
+
+        <div style="margin-top: 24px; padding: 12px; background: var(--bg-surface); border-radius: var(--radius-sm); font-size: 0.8rem; color: var(--text-muted); text-align: center;">
+            Seed Credentials: <strong>tinashe@tjfork.com</strong> / <strong>Admin2026!#Pork</strong>
+        </div>
+    </div>
+</body>
+</html>

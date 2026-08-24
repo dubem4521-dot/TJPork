@@ -1,0 +1,252 @@
+@using Microsoft.AspNetCore.Identity
+@using TJPork.Infrastructure.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject TJPork.Core.Interfaces.ICartService CartService
+
+@{
+    var currentCart = CartService.GetCart();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - T&amp;JPork | Artisanal Heritage Pork</title>
+
+    <!-- FontAwesome 6 (No emojis used anywhere) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Google Fonts Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- Neumorphic Luxury Design System -->
+    <link rel="stylesheet" href="~/css/neumorphism.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- Top Fixed Navigation -->
+    <header class="tjp-navbar">
+        <div class="tjp-nav-container">
+            <!-- Brand Logo -->
+            <a asp-controller="Home" asp-action="Index" class="tjp-logo">
+                <div class="brand-icon">
+                    <i class="fa-solid fa-drumstick-bite"></i>
+                </div>
+                <span>T&amp;J<span class="brand-highlight">Pork</span></span>
+            </a>
+
+            <!-- Search Bar with Live Filter & Suggestions -->
+            <div class="tjp-nav-search">
+                <div class="tjp-search-input-wrap">
+                    <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                    <input type="text" class="tjp-search-input" placeholder="Search bacon, chops, sausages, roasts..." autocomplete="off" />
+                </div>
+                <div class="tjp-search-suggestions"></div>
+            </div>
+
+            <!-- Navigation Links -->
+            <ul class="tjp-nav-links">
+                <li><a asp-controller="Home" asp-action="Index" class="tjp-nav-link">Home</a></li>
+                <li><a asp-controller="Shop" asp-action="Index" class="tjp-nav-link">Shop Cuts</a></li>
+                <li><a asp-controller="Home" asp-action="About" class="tjp-nav-link">About Founders</a></li>
+            </ul>
+
+            <!-- Navigation Action Buttons (Bell, Cart, Profile/Auth) -->
+            <div class="tjp-nav-actions">
+                <!-- Bell Notification Icon -->
+                <div style="position: relative;">
+                    <button type="button" class="tjp-icon-btn tjp-bell-btn" title="Order Updates &amp; Alerts">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="tjp-badge tjp-bell-badge" style="display: none;">0</span>
+                    </button>
+                    <!-- Bell Dropdown -->
+                    <div class="tjp-bell-dropdown" style="display: none; position: absolute; top: calc(100% + 12px); right: 0; width: 320px; background: #FFFFFF; border-radius: var(--radius-md); box-shadow: var(--shadow-raised-hover); border: 1px solid rgba(218, 225, 233, 0.8); z-index: 1060;">
+                        <div style="padding: 14px 18px; border-bottom: 1px solid #EEF2F6; font-weight: 700; color: var(--text-primary); font-size: 0.92rem; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Notifications</span>
+                            <span style="font-size: 0.75rem; color: var(--accent-orange); font-weight: 600;">Updates</span>
+                        </div>
+                        <div class="tjp-bell-list" style="max-height: 280px; overflow-y: auto;">
+                            <div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 0.88rem;">No notifications</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopping Cart Icon with Count Badge -->
+                <button type="button" class="tjp-icon-btn tjp-cart-trigger" title="Shopping Cart">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="tjp-badge tjp-cart-count-badge" style="@(currentCart.TotalItemCount > 0 ? "display: flex;" : "display: none;")">@currentCart.TotalItemCount</span>
+                </button>
+
+                <!-- Profile / Auth Button -->
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <a asp-controller="Profile" asp-action="Index" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="font-weight: 600;">
+                        <i class="fa-solid fa-user-circle"></i>
+                        <span>My Account</span>
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="font-weight: 600;">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Sign In</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Body Container -->
+    <main role="main" style="min-height: calc(100vh - 280px);">
+        @RenderBody()
+    </main>
+
+    <!-- Cart Slide-Over Drawer -->
+    <div class="tjp-cart-drawer-overlay"></div>
+    <div class="tjp-cart-drawer">
+        <div class="tjp-drawer-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fa-solid fa-bag-shopping" style="color: var(--accent-orange); font-size: 1.3rem;"></i>
+                <h3 style="font-size: 1.15rem;">Your Pork Cart</h3>
+            </div>
+            <button type="button" class="tjp-icon-btn tjp-drawer-close" style="width: 36px; height: 36px;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="tjp-drawer-body tjp-drawer-content-slot">
+            <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                <i class="fa-solid fa-spinner fa-spin fa-2x" style="color: var(--accent-orange);"></i>
+                <p style="margin-top: 10px;">Loading your cart...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review Modal Container -->
+    <div id="writeReviewModal" class="tjp-modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(44,62,80,0.6); backdrop-filter: blur(4px); z-index: 2100; align-items: center; justify-content: center; padding: 20px;">
+        <div class="tjp-card" style="max-width: 520px; width: 100%; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+                <h3 style="font-size: 1.25rem;">Write an Artisanal Review</h3>
+                <button type="button" class="tjp-icon-btn tjp-modal-close" style="width: 32px; height: 32px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p id="reviewProductTitle" style="font-size: 0.9rem; color: var(--accent-orange); font-weight: 600; margin-bottom: 14px;"></p>
+            
+            <form asp-controller="Review" asp-action="AddReview" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="reviewProductId" name="ProductId" value="1" />
+                <input type="hidden" id="reviewRatingInput" name="Rating" value="5" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Your Rating</label>
+                    <div class="tjp-star-picker" style="font-size: 1.5rem; color: #F1C40F; cursor: pointer; display: flex; gap: 8px;">
+                        <i class="fa-solid fa-star" data-value="1"></i>
+                        <i class="fa-solid fa-star" data-value="2"></i>
+                        <i class="fa-solid fa-star" data-value="3"></i>
+                        <i class="fa-solid fa-star" data-value="4"></i>
+                        <i class="fa-solid fa-star" data-value="5"></i>
+                    </div>
+                </div>
+
+                @if (!SignInManager.IsSignedIn(User))
+                {
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Your Name</label>
+                        <input type="text" name="CustomerName" class="tjp-input" required placeholder="e.g. Eleanor Vance" />
+                    </div>
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Your Email</label>
+                        <input type="email" name="CustomerEmail" class="tjp-input" placeholder="e.g. eleanor@example.com" />
+                    </div>
+                }
+
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Review Headline</label>
+                    <input type="text" name="Title" class="tjp-input" required placeholder="e.g. Unbelievable tenderness and smoke aroma!" />
+                </div>
+
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Your Review &amp; Culinary Experience</label>
+                    <textarea name="Comment" rows="4" class="tjp-textarea" required placeholder="Share your cooking method, flavor impressions, and thoughts on quality..."></textarea>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+                    <button type="button" class="tjp-btn tjp-btn-neu tjp-modal-close">Cancel</button>
+                    <button type="submit" class="tjp-btn tjp-btn-primary"><i class="fa-solid fa-paper-plane"></i> Submit Review</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="background: #2C3E50; color: #FFFFFF; padding: 60px 0 30px; margin-top: 80px;">
+        <div class="container">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px; margin-bottom: 40px;">
+                <!-- Col 1: Brand -->
+                <div>
+                    <div class="tjp-logo" style="color: #FFFFFF; margin-bottom: 16px;">
+                        <div class="brand-icon" style="background: var(--accent-orange); color: #FFFFFF;">
+                            <i class="fa-solid fa-drumstick-bite"></i>
+                        </div>
+                        <span>T&amp;J<span style="color: var(--accent-orange);">Pork</span></span>
+                    </div>
+                    <p style="color: #94A3B8; font-size: 0.92rem; line-height: 1.6; margin-bottom: 18px;">
+                        Ethically sourced, pasture-raised heritage pork. Crafted and hand-cured with pride by Tinashe &amp; Jeffery.
+                    </p>
+                    <div style="display: flex; gap: 12px;">
+                        <span class="tjp-chip" style="background: rgba(255,255,255,0.08); color: #CBD5E1; border-color: rgba(255,255,255,0.1);"><i class="fa-solid fa-leaf" style="color: var(--accent-green);"></i> 100% Pasture-Raised</span>
+                        <span class="tjp-chip" style="background: rgba(255,255,255,0.08); color: #CBD5E1; border-color: rgba(255,255,255,0.1);"><i class="fa-solid fa-award" style="color: var(--accent-orange);"></i> Small Batch</span>
+                    </div>
+                </div>
+
+                <!-- Col 2: Quick Links -->
+                <div>
+                    <h4 style="color: #FFFFFF; font-size: 1.05rem; margin-bottom: 18px;">Artisanal Cuts</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 0.92rem; color: #CBD5E1;">
+                        <li><a asp-controller="Shop" asp-action="Index" asp-route-categoryId="1" style="color: #CBD5E1;"><i class="fa-solid fa-chevron-right" style="font-size: 0.75rem; color: var(--accent-orange); margin-right: 6px;"></i> Artisanal Bacon</a></li>
+                        <li><a asp-controller="Shop" asp-action="Index" asp-route-categoryId="2" style="color: #CBD5E1;"><i class="fa-solid fa-chevron-right" style="font-size: 0.75rem; color: var(--accent-orange); margin-right: 6px;"></i> Gourmet Sausages</a></li>
+                        <li><a asp-controller="Shop" asp-action="Index" asp-route-categoryId="3" style="color: #CBD5E1;"><i class="fa-solid fa-chevron-right" style="font-size: 0.75rem; color: var(--accent-orange); margin-right: 6px;"></i> Heritage Pork Chops</a></li>
+                        <li><a asp-controller="Shop" asp-action="Index" asp-route-categoryId="4" style="color: #CBD5E1;"><i class="fa-solid fa-chevron-right" style="font-size: 0.75rem; color: var(--accent-orange); margin-right: 6px;"></i> Roasts &amp; St. Louis Ribs</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Sourcing & Quality -->
+                <div>
+                    <h4 style="color: #FFFFFF; font-size: 1.05rem; margin-bottom: 18px;">Our Heritage Pledge</h4>
+                    <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 0.92rem; color: #CBD5E1;">
+                        <li><a asp-controller="Home" asp-action="About" style="color: #CBD5E1;"><i class="fa-solid fa-chevron-right" style="font-size: 0.75rem; color: var(--accent-orange); margin-right: 6px;"></i> Meet Tinashe &amp; Jeffery</a></li>
+                        <li><span style="color: #94A3B8;"><i class="fa-solid fa-shield-halved" style="color: var(--accent-green); margin-right: 6px;"></i> Zero Hormones or Antibiotics</span></li>
+                        <li><span style="color: #94A3B8;"><i class="fa-solid fa-truck" style="color: var(--accent-orange); margin-right: 6px;"></i> Temperature-Controlled Delivery</span></li>
+                        <li><span style="color: #94A3B8;"><i class="fa-solid fa-house-chimney" style="color: #3498DB; margin-right: 6px;"></i> Local Austin Farm Partners</span></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Newsletter -->
+                <div>
+                    <h4 style="color: #FFFFFF; font-size: 1.05rem; margin-bottom: 18px;">Join the Smokehouse Club</h4>
+                    <p style="color: #94A3B8; font-size: 0.88rem; margin-bottom: 14px;">Receive exclusive small-batch curing announcements and seasonal recipes.</p>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="email" placeholder="Enter your email" style="padding: 10px 14px; border-radius: var(--radius-sm); border: none; font-size: 0.9rem; flex: 1; outline: none;" />
+                        <button type="button" class="tjp-btn tjp-btn-primary tjp-btn-sm">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; color: #64748B; font-size: 0.85rem;">
+                <p>&copy; @DateTime.UtcNow.Year T&amp;JPork Artisanal Meats. All rights reserved.</p>
+                <div style="display: flex; gap: 20px;">
+                    <a asp-controller="Home" asp-action="Privacy" style="color: #94A3B8;">Privacy Policy</a>
+                    <span style="color: #475569;">&bull;</span>
+                    <a asp-controller="Home" asp-action="About" style="color: #94A3B8;">Values &amp; Standards</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

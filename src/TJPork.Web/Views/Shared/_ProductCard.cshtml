@@ -1,0 +1,59 @@
+@model TJPork.Core.Entities.Product
+
+<div class="tjp-product-card" data-category-id="@Model.CategoryId" data-price="@Model.FinalPrice">
+    <div class="tjp-product-thumb">
+        <img src="@Model.ImageUrl" alt="@Model.Name" loading="lazy" onerror="this.src='/images/products/placeholder.jpg'" />
+        @if (!string.IsNullOrEmpty(Model.Category?.Name))
+        {
+            <span class="tjp-card-tag">@Model.Category.Name</span>
+        }
+        @if (Model.DiscountPercentage > 0)
+        {
+            <span class="tjp-discount-badge">-@Model.DiscountPercentage% OFF</span>
+        }
+        else if (Model.IsFeatured)
+        {
+            <span class="tjp-discount-badge" style="background: var(--accent-green);">FEATURED</span>
+        }
+    </div>
+
+    <h3 class="tjp-product-title">
+        <a asp-controller="Shop" asp-action="Details" asp-route-slug="@Model.Slug">@Model.Name</a>
+    </h3>
+
+    <p class="tjp-product-desc">@Model.ShortDescription</p>
+
+    <div class="tjp-product-meta">
+        <div class="tjp-rating">
+            <i class="fa-solid fa-star"></i>
+            <span>@Model.Rating.ToString("F1")</span>
+            <span class="tjp-rating-count">(@Model.ReviewCount)</span>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+            @Model.WeightDescription
+        </div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 14px; border-top: 1px solid #F1F5F9;">
+        <div class="tjp-price-wrap">
+            <span class="tjp-price-current">R@(Model.FinalPrice.ToString("F2"))</span>
+            @if (Model.DiscountPercentage > 0)
+            {
+                <span class="tjp-price-original">R@(Model.Price.ToString("F2"))</span>
+            }
+        </div>
+
+        @if (Model.StockQuantity > 0)
+        {
+            <button type="button" class="tjp-btn tjp-btn-primary tjp-btn-sm tjp-add-to-cart-btn" data-product-id="@Model.Id" data-quantity="1">
+                <i class="fa-solid fa-cart-shopping"></i> Add
+            </button>
+        }
+        else
+        {
+            <button type="button" class="tjp-btn tjp-btn-neu tjp-btn-sm" disabled style="opacity: 0.6; cursor: not-allowed;">
+                Sold Out
+            </button>
+        }
+    </div>
+</div>

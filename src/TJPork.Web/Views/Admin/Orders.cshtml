@@ -1,0 +1,100 @@
+@model TJPork.Web.ViewModels.AdminOrderListViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Order Fulfillment & Management";
+}
+
+<!-- Filter Tabs Bar -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+    <div style="display: flex; gap: 8px;">
+        <a asp-action="Orders" asp-route-tab="all" class="tjp-btn tjp-btn-neu tjp-btn-sm @(Model.ActiveTab == "all" ? "active" : "")">
+            All Orders (@Model.Orders.Count)
+        </a>
+        <a asp-action="Orders" asp-route-tab="pending" class="tjp-btn tjp-btn-neu tjp-btn-sm @(Model.ActiveTab == "pending" ? "active" : "")">
+            <i class="fa-solid fa-fire-burner" style="color: var(--accent-orange);"></i> In Preparation
+        </a>
+        <a asp-action="Orders" asp-route-tab="completed" class="tjp-btn tjp-btn-neu tjp-btn-sm @(Model.ActiveTab == "completed" ? "active" : "")">
+            <i class="fa-solid fa-circle-check" style="color: var(--accent-green);"></i> Delivered
+        </a>
+        <a asp-action="Orders" asp-route-tab="cancelled" class="tjp-btn tjp-btn-neu tjp-btn-sm @(Model.ActiveTab == "cancelled" ? "active" : "")">
+            <i class="fa-solid fa-circle-xmark" style="color: var(--danger);"></i> Cancelled
+        </a>
+    </div>
+
+    <!-- Search Box -->
+    <form method="get" asp-action="Orders" style="display: flex; gap: 8px;">
+        <input type="hidden" name="tab" value="@Model.ActiveTab" />
+        <input type="text" name="search" value="@Model.Search" class="tjp-input" placeholder="Search Order # or Customer..." style="padding: 6px 14px; width: 240px; font-size: 0.88rem;" />
+        <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm"><i class="fa-solid fa-magnifying-glass"></i></button>
+    </form>
+</div>
+
+<!-- Orders Table -->
+<div class="tjp-card" style="padding: 0; overflow: hidden;">
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem;">
+            <thead>
+                <tr style="background: var(--bg-surface); border-bottom: 1px solid #EEF2F6; color: var(--text-secondary); font-size: 0.82rem;">
+                    <th style="padding: 14px 20px;">Order #</th>
+                    <th style="padding: 14px 20px;">Customer</th>
+                    <th style="padding: 14px 20px;">Date &amp; Slot</th>
+                    <th style="padding: 14px 20px;">Items</th>
+                    <th style="padding: 14px 20px; text-align: right;">Total Amount</th>
+                    <th style="padding: 14px 20px; text-align: center;">Payment</th>
+                    <th style="padding: 14px 20px; text-align: center;">Delivery Status</th>
+                    <th style="padding: 14px 20px; text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.Orders.Any())
+                {
+                    <tr>
+                        <td colspan="8" style="padding: 40px; text-align: center; color: var(--text-muted);">
+                            No orders found under this category.
+                        </td>
+                    </tr>
+                }
+                @foreach (var ord in Model.Orders)
+                {
+                    <tr style="border-bottom: 1px solid #F1F5F9;">
+                        <td style="padding: 14px 20px;" class="mono">
+                            <strong style="color: var(--accent-orange);">#@ord.OrderNumber</strong>
+                        </td>
+                        <td style="padding: 14px 20px;">
+                            <div style="font-weight: 600; color: var(--text-primary);">@ord.CustomerName</div>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">@ord.CustomerPhone</div>
+                        </td>
+                        <td style="padding: 14px 20px;">
+                            <div>@ord.DeliveryDate.ToString("MMM dd, yyyy")</div>
+                            <div style="font-size: 0.78rem; color: var(--text-secondary);">@ord.DeliverySlot</div>
+                        </td>
+                        <td style="padding: 14px 20px;">
+                            <span class="mono" style="font-weight: 600;">@ord.Items.Sum(i => i.Quantity) cuts</span>
+                        </td>
+                        <td style="padding: 14px 20px; text-align: right;" class="mono">
+                            <strong style="color: var(--text-primary); font-size: 1rem;">R@(ord.TotalAmount.ToString("F2"))</strong>
+                        </td>
+                        <td style="padding: 14px 20px; text-align: center;">
+                            <span class="tjp-badge" style="position: static; font-size: 0.75rem; background: @(ord.PaymentStatus == PaymentStatus.Paid ? "var(--accent-green)" : "var(--accent-orange)");">
+                                @ord.PaymentStatus
+                            </span>
+                            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 2px;">@ord.PaymentMethod</div>
+                        </td>
+                        <td style="padding: 14px 20px; text-align: center;">
+                            <span class="tjp-chip" style="font-size: 0.75rem; padding: 4px 10px; background: @(ord.DeliveryStatus == OrderStatus.Delivered ? "var(--accent-green-light)" : "var(--accent-orange-light)"); color: @(ord.DeliveryStatus == OrderStatus.Delivered ? "var(--accent-green)" : "var(--accent-orange)"); font-weight: 700;">
+                                @ord.DeliveryStatus
+                            </span>
+                        </td>
+                        <td style="padding: 14px 20px; text-align: right;">
+                            <div style="display: inline-flex; gap: 6px;">
+                                <button type="button" class="tjp-btn tjp-btn-primary tjp-btn-sm view-order-btn" data-order-id="@ord.Id" style="padding: 6px 12px; font-size: 0.8rem;">
+                                    <i class="fa-solid fa-eye"></i> Details
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

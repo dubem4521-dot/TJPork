@@ -1,0 +1,230 @@
+@model TJPork.Web.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Secure Checkout - T&JPork";
+}
+
+<div class="container" style="margin-top: 110px; margin-bottom: 80px;">
+    <!-- Checkout Stepper Banner -->
+    <div style="text-align: center; margin-bottom: 40px;">
+        <span style="color: var(--accent-orange); font-weight: 700; font-size: 0.85rem; text-transform: uppercase;">Farm-to-Door Fulfillment</span>
+        <h1 style="font-size: 2.4rem; margin-top: 4px;">Artisanal Checkout</h1>
+    </div>
+
+    <form asp-action="Index" method="post" id="checkoutForm">
+        @Html.AntiForgeryToken()
+
+        <div style="display: grid; grid-template-columns: 1fr 400px; gap: 36px; align-items: start;">
+            <!-- Left: 2-Step Form -->
+            <div style="display: flex; flex-direction: column; gap: 30px;">
+                <!-- STEP 1: Delivery Details -->
+                <div class="tjp-card" style="padding: 32px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid #EEF2F6; padding-bottom: 14px;">
+                        <span style="width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--accent-orange); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem;">1</span>
+                        <h2 style="font-size: 1.35rem; margin: 0;">Delivery Information &amp; Schedule</h2>
+                    </div>
+
+                    <div asp-validation-summary="ModelOnly" style="color: var(--danger); font-size: 0.88rem; margin-bottom: 16px;"></div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="tjp-input-group">
+                            <label asp-for="CustomerName" class="tjp-label"></label>
+                            <input asp-for="CustomerName" class="tjp-input" placeholder="e.g. Sipho Ndlovu" />
+                            <span asp-validation-for="CustomerName" style="color: var(--danger); font-size: 0.8rem;"></span>
+                        </div>
+
+                        <div class="tjp-input-group">
+                            <label asp-for="CustomerEmail" class="tjp-label"></label>
+                            <input asp-for="CustomerEmail" class="tjp-input" placeholder="e.g. sipho@example.co.za" />
+                            <span asp-validation-for="CustomerEmail" style="color: var(--danger); font-size: 0.8rem;"></span>
+                        </div>
+                    </div>
+
+                    <div class="tjp-input-group">
+                        <label asp-for="CustomerPhone" class="tjp-label"></label>
+                        <input asp-for="CustomerPhone" class="tjp-input" placeholder="e.g. +27 (0)84 789 0123" />
+                        <span asp-validation-for="CustomerPhone" style="color: var(--danger); font-size: 0.8rem;"></span>
+                    </div>
+
+                    <div class="tjp-input-group">
+                        <label asp-for="ShippingAddress" class="tjp-label"></label>
+                        <input asp-for="ShippingAddress" class="tjp-input" placeholder="Street name, apartment, unit, complex" />
+                        <span asp-validation-for="ShippingAddress" style="color: var(--danger); font-size: 0.8rem;"></span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+                        <div class="tjp-input-group">
+                            <label asp-for="City" class="tjp-label"></label>
+                            <input asp-for="City" class="tjp-input" placeholder="e.g. Cape Town, Johannesburg" />
+                            <span asp-validation-for="City" style="color: var(--danger); font-size: 0.8rem;"></span>
+                        </div>
+
+                        <div class="tjp-input-group">
+                            <label asp-for="PostalCode" class="tjp-label"></label>
+                            <input asp-for="PostalCode" class="tjp-input" placeholder="e.g. 8001, 2196" />
+                            <span asp-validation-for="PostalCode" style="color: var(--danger); font-size: 0.8rem;"></span>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div class="tjp-input-group">
+                            <label asp-for="DeliveryDate" class="tjp-label"></label>
+                            <input asp-for="DeliveryDate" class="tjp-input" />
+                            <span asp-validation-for="DeliveryDate" style="color: var(--danger); font-size: 0.8rem;"></span>
+                        </div>
+
+                        <div class="tjp-input-group">
+                            <label asp-for="DeliverySlot" class="tjp-label"></label>
+                            <select asp-for="DeliverySlot" class="tjp-select">
+                                <option value="Morning">Morning (9:00 AM &ndash; 12:00 PM)</option>
+                                <option value="Afternoon">Afternoon (1:00 PM &ndash; 5:00 PM)</option>
+                                <option value="Evening">Evening (6:00 PM &ndash; 9:00 PM)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="tjp-input-group">
+                        <label asp-for="SpecialInstructions" class="tjp-label"></label>
+                        <input asp-for="SpecialInstructions" class="tjp-input" placeholder="e.g. Complex gate code #4912, leave at front desk" />
+                    </div>
+                </div>
+
+                <!-- STEP 2: Payment Method -->
+                <div class="tjp-card" style="padding: 32px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid #EEF2F6; padding-bottom: 14px;">
+                        <span style="width: 32px; height: 32px; border-radius: var(--radius-full); background: var(--accent-orange); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem;">2</span>
+                        <h2 style="font-size: 1.35rem; margin: 0;">Payment Method</h2>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+                        <!-- Option A: Cash on delivery -->
+                        <label class="tjp-card" style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; box-shadow: var(--shadow-raised-sm); margin: 0;">
+                            <input type="radio" asp-for="PaymentMethod" value="CashOnDelivery" id="payCod" style="width: 20px; height: 20px; accent-color: var(--accent-orange);" checked />
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; font-size: 1rem; color: var(--text-primary);"><i class="fa-solid fa-money-bill-wave" style="color: var(--accent-green); margin-right: 8px;"></i> Pay Upon Delivery (Cash / Card Terminal)</div>
+                                <div style="font-size: 0.84rem; color: var(--text-secondary);">Pay when your cold-chain pork package is delivered to your door.</div>
+                            </div>
+                        </label>
+
+                        <!-- Option B: Pay Now via Card -->
+                        <label class="tjp-card" style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; box-shadow: var(--shadow-raised-sm); margin: 0;">
+                            <input type="radio" asp-for="PaymentMethod" value="CreditCard" id="payCard" style="width: 20px; height: 20px; accent-color: var(--accent-orange);" />
+                            <div style="flex: 1;">
+                                <div style="font-weight: 700; font-size: 1rem; color: var(--text-primary);"><i class="fa-solid fa-credit-card" style="color: #3498DB; margin-right: 8px;"></i> Pay Now (Credit / Debit Card)</div>
+                                <div style="font-size: 0.84rem; color: var(--text-secondary);">Instant secure online processing (Visa, MasterCard, PayFast).</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- Card Fields Container -->
+                    <div id="cardFieldsSection" style="display: none; background: var(--bg-surface); padding: 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm);">
+                        <div class="tjp-input-group">
+                            <label class="tjp-label">Name on Card</label>
+                            <input asp-for="CardHolderName" class="tjp-input" placeholder="e.g. Sipho Ndlovu" />
+                        </div>
+
+                        <div class="tjp-input-group">
+                            <label class="tjp-label">Card Number</label>
+                            <input asp-for="CardNumber" class="tjp-input" placeholder="4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 8921" />
+                            <span asp-validation-for="CardNumber" style="color: var(--danger); font-size: 0.8rem;"></span>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="tjp-input-group">
+                                <label class="tjp-label">Expiration Date</label>
+                                <input asp-for="CardExpiry" class="tjp-input" placeholder="MM/YY" />
+                                <span asp-validation-for="CardExpiry" style="color: var(--danger); font-size: 0.8rem;"></span>
+                            </div>
+
+                            <div class="tjp-input-group">
+                                <label class="tjp-label">Security CVC</label>
+                                <input asp-for="CardCvc" class="tjp-input" placeholder="CVC" maxlength="4" />
+                                <span asp-validation-for="CardCvc" style="color: var(--danger); font-size: 0.8rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div class="tjp-card" style="padding: 28px; position: sticky; top: 96px;">
+                <h3 style="font-size: 1.3rem; margin-bottom: 20px; border-bottom: 1px solid #EEF2F6; padding-bottom: 12px;">Order Summary</h3>
+
+                <!-- Purchased Items Mini List -->
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; max-height: 220px; overflow-y: auto;">
+                    @foreach (var item in Model.Cart.Items)
+                    {
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="@item.ImageUrl" alt="@item.ProductName" style="width: 38px; height: 38px; border-radius: 4px; object-fit: cover;" onerror="this.src='/images/products/placeholder.jpg'" />
+                                <div>
+                                    <div style="font-weight: 600; color: var(--text-primary);">@item.ProductName</div>
+                                    <div style="color: var(--text-muted); font-size: 0.78rem;">Qty: @item.Quantity &bull; R@(item.UnitPrice.ToString("F2"))</div>
+                                </div>
+                            </div>
+                            <span class="mono" style="font-weight: 700;">R@(item.TotalPrice.ToString("F2"))</span>
+                        </div>
+                    }
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; border-top: 1px solid #EEF2F6; padding-top: 16px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary);">
+                        <span>Subtotal:</span>
+                        <span class="mono">R@(Model.Cart.Subtotal.ToString("F2"))</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary);">
+                        <span>Delivery Fee:</span>
+                        <span class="mono">@(Model.Cart.DeliveryFee == 0 ? "FREE" : "R" + Model.Cart.DeliveryFee.ToString("F2"))</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary);">
+                        <span>VAT (15%):</span>
+                        <span class="mono">R@(Model.Cart.TaxAmount.ToString("F2"))</span>
+                    </div>
+                    @if (Model.Cart.DiscountAmount > 0)
+                    {
+                        <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--accent-green); font-weight: 600;">
+                            <span>Promo Discount:</span>
+                            <span class="mono">-R@(Model.Cart.DiscountAmount.ToString("F2"))</span>
+                        </div>
+                    }
+                    <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 800; border-top: 1px solid #E2E8F0; padding-top: 12px; margin-top: 6px;">
+                        <span>Total Due:</span>
+                        <span class="mono" style="color: var(--accent-orange);">R@(Model.Cart.Total.ToString("F2"))</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="tjp-btn tjp-btn-primary tjp-btn-lg" style="width: 100%; font-size: 1.05rem;">
+                    <i class="fa-solid fa-lock"></i> Place Order Now
+                </button>
+
+                <div style="margin-top: 16px; text-align: center; font-size: 0.8rem; color: var(--text-muted);">
+                    By placing your order, you agree to T&amp;JPork terms and receive automatic order notification emails.
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const payCardRadio = document.querySelector('#payCard');
+            const payCodRadio = document.querySelector('#payCod');
+            const cardFields = document.querySelector('#cardFieldsSection');
+
+            function toggleCardFields() {
+                if (payCardRadio && payCardRadio.checked) {
+                    cardFields.style.display = 'block';
+                } else {
+                    cardFields.style.display = 'none';
+                }
+            }
+
+            if (payCardRadio && payCodRadio && cardFields) {
+                payCardRadio.addEventListener('change', toggleCardFields);
+                payCodRadio.addEventListener('change', toggleCardFields);
+                toggleCardFields();
+            }
+        });
+    </script>
+}

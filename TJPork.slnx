@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="run.ps1" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/TJPork.Core/TJPork.Core.csproj" />
     <Project Path="src/TJPork.Infrastructure/TJPork.Infrastructure.csproj" />

@@ -24,7 +24,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push:
+          push: true
           tags: |
             rustytoothpickk/tjpork-app:latest
             rustytoothpickk/tjpork-app:${{ github.sha }}

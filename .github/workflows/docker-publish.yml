@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+        
       - name: Set Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -24,7 +27,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          push:
+          push: true
           tags: |
             rustytoothpickk/tjpork-app:latest
             rustytoothpickk/tjpork-app:${{ github.sha }}

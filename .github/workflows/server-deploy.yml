@@ -7,7 +7,7 @@ on:
       - completed
 jobs:
   deploy:
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     if: ${{ github.event.workflow-run.conclusion == 'success' }}
     steps:
       - name: SSH and Redeploy

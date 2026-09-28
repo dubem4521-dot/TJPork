@@ -22,6 +22,7 @@ namespace TJPork.Infrastructure.Data
 
         public static string FormatPostgreSqlConnectionString(string raw)
         {
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
             if (string.IsNullOrWhiteSpace(raw)) return raw;
             var trimmed = raw.Trim().Trim('"', '\'');
 

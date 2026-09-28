@@ -40,6 +40,14 @@ namespace TJPork.Infrastructure.Services
             }
 
             order.CreatedAt = DateTime.UtcNow;
+            if (order.DeliveryDate.Kind == DateTimeKind.Unspecified)
+            {
+                order.DeliveryDate = DateTime.SpecifyKind(order.DeliveryDate, DateTimeKind.Utc);
+            }
+            else if (order.DeliveryDate.Kind == DateTimeKind.Local)
+            {
+                order.DeliveryDate = order.DeliveryDate.ToUniversalTime();
+            }
             order.Subtotal = cart.Subtotal;
             order.DeliveryFee = cart.DeliveryFee;
             order.TaxAmount = cart.TaxAmount;

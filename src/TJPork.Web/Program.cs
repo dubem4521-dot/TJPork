@@ -11,6 +11,8 @@ using TJPork.Infrastructure.Identity;
 using TJPork.Infrastructure.Seed;
 using TJPork.Infrastructure.Services;
 using TJPork.Web.Services;
+// Opt out of Npgsql 6+ strict UTC DateTime validation to safely support HTML date inputs
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 

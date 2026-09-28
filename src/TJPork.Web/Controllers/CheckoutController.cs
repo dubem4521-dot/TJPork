@@ -109,7 +109,7 @@ namespace TJPork.Web.Controllers
                 ShippingAddress = model.ShippingAddress,
                 City = model.City,
                 PostalCode = model.PostalCode,
-                DeliveryDate = model.DeliveryDate,
+                DeliveryDate = DateTime.SpecifyKind(model.DeliveryDate, DateTimeKind.Utc),
                 DeliverySlot = model.DeliverySlot,
                 SpecialInstructions = model.SpecialInstructions,
                 PaymentMethod = model.PaymentMethod
@@ -127,6 +127,11 @@ namespace TJPork.Web.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError("", ex.Message);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An unexpected error occurred while placing your order. Please try again. " + ex.Message);
                 return View(model);
             }
         }

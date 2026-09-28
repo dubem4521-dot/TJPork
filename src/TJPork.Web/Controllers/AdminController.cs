@@ -910,14 +910,23 @@ namespace TJPork.Web.Controllers
             if (settings.TryGetValue("AboutUs.Founder1Name", out var f1Name)) model.Founder1Name = f1Name;
             if (settings.TryGetValue("AboutUs.Founder1Role", out var f1Role)) model.Founder1Role = f1Role;
             if (settings.TryGetValue("AboutUs.Founder1Bio", out var f1Bio)) model.Founder1Bio = f1Bio;
-            if (settings.TryGetValue("AboutUs.Founder1ImageUrl", out var f1Img)) model.Founder1ImageUrl = f1Img;
+            if (settings.TryGetValue("AboutUs.Founder1ImageUrl", out var f1Img) && !string.IsNullOrWhiteSpace(f1Img))
+                model.Founder1ImageUrl = f1Img;
+            else
+                model.Founder1ImageUrl = "/images/about/tinashe.jpg";
+
             if (settings.TryGetValue("AboutUs.Founder1Badge1", out var f1B1)) model.Founder1Badge1 = f1B1;
             if (settings.TryGetValue("AboutUs.Founder1Badge2", out var f1B2)) model.Founder1Badge2 = f1B2;
 
             if (settings.TryGetValue("AboutUs.Founder2Name", out var f2Name)) model.Founder2Name = f2Name;
             if (settings.TryGetValue("AboutUs.Founder2Role", out var f2Role)) model.Founder2Role = f2Role;
             if (settings.TryGetValue("AboutUs.Founder2Bio", out var f2Bio)) model.Founder2Bio = f2Bio;
-            if (settings.TryGetValue("AboutUs.Founder2ImageUrl", out var f2Img)) model.Founder2ImageUrl = f2Img;
+
+            if (settings.TryGetValue("AboutUs.Founder2ImageUrl", out var f2Img) && !string.IsNullOrWhiteSpace(f2Img))
+                model.Founder2ImageUrl = f2Img;
+            else
+                model.Founder2ImageUrl = "/images/about/jeffery.jpg";
+
             if (settings.TryGetValue("AboutUs.Founder2Badge1", out var f2B1)) model.Founder2Badge1 = f2B1;
             if (settings.TryGetValue("AboutUs.Founder2Badge2", out var f2B2)) model.Founder2Badge2 = f2B2;
 
@@ -959,6 +968,13 @@ namespace TJPork.Web.Controllers
                     ModelState.AddModelError("Founder1ImageFile", error);
                 }
             }
+            else if (string.IsNullOrWhiteSpace(model.Founder1ImageUrl))
+            {
+                var existingF1 = await _db.StoreSettings.FirstOrDefaultAsync(s => s.Key == "AboutUs.Founder1ImageUrl");
+                model.Founder1ImageUrl = !string.IsNullOrWhiteSpace(existingF1?.Value)
+                    ? existingF1.Value
+                    : "/images/about/tinashe.jpg";
+            }
 
             // Handle Founder 2 Image Upload
             if (founder2ImageFile != null && founder2ImageFile.Length > 0)
@@ -977,10 +993,26 @@ namespace TJPork.Web.Controllers
                     ModelState.AddModelError("Founder2ImageFile", error);
                 }
             }
+            else if (string.IsNullOrWhiteSpace(model.Founder2ImageUrl))
+            {
+                var existingF2 = await _db.StoreSettings.FirstOrDefaultAsync(s => s.Key == "AboutUs.Founder2ImageUrl");
+                model.Founder2ImageUrl = !string.IsNullOrWhiteSpace(existingF2?.Value)
+                    ? existingF2.Value
+                    : "/images/about/jeffery.jpg";
+            }
 
             if (!ModelState.IsValid)
             {
                 return View(model);
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Founder1ImageUrl))
+            {
+                model.Founder1ImageUrl = "/images/about/tinashe.jpg";
+            }
+            if (string.IsNullOrWhiteSpace(model.Founder2ImageUrl))
+            {
+                model.Founder2ImageUrl = "/images/about/jeffery.jpg";
             }
 
             var entries = new Dictionary<string, string>
@@ -1017,20 +1049,30 @@ namespace TJPork.Web.Controllers
 
             foreach (var kvp in entries)
             {
+                var val = kvp.Value ?? "";
+                if (kvp.Key == "AboutUs.Founder1ImageUrl" && string.IsNullOrWhiteSpace(val))
+                {
+                    val = "/images/about/tinashe.jpg";
+                }
+                else if (kvp.Key == "AboutUs.Founder2ImageUrl" && string.IsNullOrWhiteSpace(val))
+                {
+                    val = "/images/about/jeffery.jpg";
+                }
+
                 var setting = await _db.StoreSettings.FirstOrDefaultAsync(s => s.Key == kvp.Key);
                 if (setting == null)
                 {
                     _db.StoreSettings.Add(new StoreSetting
                     {
                         Key = kvp.Key,
-                        Value = kvp.Value ?? "",
+                        Value = val,
                         Group = "AboutUs",
                         Description = kvp.Key
                     });
                 }
                 else
                 {
-                    setting.Value = kvp.Value ?? "";
+                    setting.Value = val;
                 }
             }
 

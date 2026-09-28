@@ -92,14 +92,23 @@ namespace TJPork.Web.Controllers
             if (settings.TryGetValue("AboutUs.Founder1Name", out var f1Name)) model.Founder1Name = f1Name;
             if (settings.TryGetValue("AboutUs.Founder1Role", out var f1Role)) model.Founder1Role = f1Role;
             if (settings.TryGetValue("AboutUs.Founder1Bio", out var f1Bio)) model.Founder1Bio = f1Bio;
-            if (settings.TryGetValue("AboutUs.Founder1ImageUrl", out var f1Img)) model.Founder1ImageUrl = f1Img;
+            if (settings.TryGetValue("AboutUs.Founder1ImageUrl", out var f1Img) && !string.IsNullOrWhiteSpace(f1Img))
+                model.Founder1ImageUrl = f1Img;
+            else
+                model.Founder1ImageUrl = "/images/about/tinashe.jpg";
+
             if (settings.TryGetValue("AboutUs.Founder1Badge1", out var f1B1)) model.Founder1Badge1 = f1B1;
             if (settings.TryGetValue("AboutUs.Founder1Badge2", out var f1B2)) model.Founder1Badge2 = f1B2;
 
             if (settings.TryGetValue("AboutUs.Founder2Name", out var f2Name)) model.Founder2Name = f2Name;
             if (settings.TryGetValue("AboutUs.Founder2Role", out var f2Role)) model.Founder2Role = f2Role;
             if (settings.TryGetValue("AboutUs.Founder2Bio", out var f2Bio)) model.Founder2Bio = f2Bio;
-            if (settings.TryGetValue("AboutUs.Founder2ImageUrl", out var f2Img)) model.Founder2ImageUrl = f2Img;
+
+            if (settings.TryGetValue("AboutUs.Founder2ImageUrl", out var f2Img) && !string.IsNullOrWhiteSpace(f2Img))
+                model.Founder2ImageUrl = f2Img;
+            else
+                model.Founder2ImageUrl = "/images/about/jeffery.jpg";
+
             if (settings.TryGetValue("AboutUs.Founder2Badge1", out var f2B1)) model.Founder2Badge1 = f2B1;
             if (settings.TryGetValue("AboutUs.Founder2Badge2", out var f2B2)) model.Founder2Badge2 = f2B2;
 

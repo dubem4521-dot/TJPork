@@ -18,7 +18,7 @@
         <!-- Left: Founder 1 -->
         <div class="tjp-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 36px 28px;">
             <div style="width: 140px; height: 140px; border-radius: var(--radius-full); overflow: hidden; border: 4px solid var(--bg-surface); box-shadow: var(--shadow-raised-sm); margin-bottom: 20px;">
-                <img src="@Model.Founder1ImageUrl" alt="@Model.Founder1Name" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/images/avatars/default.png'" />
+                <img src="@(string.IsNullOrWhiteSpace(Model.Founder1ImageUrl) ? "/images/about/tinashe.jpg" : Model.Founder1ImageUrl)" alt="@Model.Founder1Name" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/images/about/tinashe.jpg'" />
             </div>
             <h2 style="font-size: 1.6rem; margin-bottom: 4px;">@Model.Founder1Name</h2>
             <span style="color: var(--accent-orange); font-weight: 600; font-size: 0.95rem; margin-bottom: 18px;">@Model.Founder1Role</span>
@@ -40,7 +40,7 @@
         <!-- Right: Founder 2 -->
         <div class="tjp-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 36px 28px;">
             <div style="width: 140px; height: 140px; border-radius: var(--radius-full); overflow: hidden; border: 4px solid var(--bg-surface); box-shadow: var(--shadow-raised-sm); margin-bottom: 20px;">
-                <img src="@Model.Founder2ImageUrl" alt="@Model.Founder2Name" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/images/avatars/default.png'" />
+                <img src="@(string.IsNullOrWhiteSpace(Model.Founder2ImageUrl) ? "/images/about/jeffery.jpg" : Model.Founder2ImageUrl)" alt="@Model.Founder2Name" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='/images/about/jeffery.jpg'" />
             </div>
             <h2 style="font-size: 1.6rem; margin-bottom: 4px;">@Model.Founder2Name</h2>
             <span style="color: var(--accent-orange); font-weight: 600; font-size: 0.95rem; margin-bottom: 18px;">@Model.Founder2Role</span>

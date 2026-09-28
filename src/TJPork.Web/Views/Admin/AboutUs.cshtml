@@ -1,4 +1,4 @@
-﻿@model TJPork.Web.ViewModels.AboutUsEditViewModel
+@model TJPork.Web.ViewModels.AboutUsEditViewModel
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "About Us CMS";
@@ -18,8 +18,8 @@
 
     <form asp-action="AboutUs" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="Founder1ImageUrl" />
-        <input type="hidden" asp-for="Founder2ImageUrl" />
+        <input type="hidden" name="Founder1ImageUrl" id="Founder1ImageUrl" value="@(string.IsNullOrWhiteSpace(Model.Founder1ImageUrl) ? "/images/about/tinashe.jpg" : Model.Founder1ImageUrl)" />
+        <input type="hidden" name="Founder2ImageUrl" id="Founder2ImageUrl" value="@(string.IsNullOrWhiteSpace(Model.Founder2ImageUrl) ? "/images/about/jeffery.jpg" : Model.Founder2ImageUrl)" />
 
         <div style="display: flex; flex-direction: column; gap: 28px;">
             <!-- 1. Header & Story Intro -->
@@ -54,7 +54,7 @@
 
                 <div style="display: grid; grid-template-columns: 140px 1fr; gap: 24px; align-items: start; margin-bottom: 18px;">
                     <div style="text-align: center;">
-                        <img src="@Model.Founder1ImageUrl" alt="Founder 1" style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--accent-orange); box-shadow: var(--shadow-raised-sm); margin-bottom: 8px;" onerror="this.src='/images/avatars/default.png'" />
+                        <img src="@(string.IsNullOrWhiteSpace(Model.Founder1ImageUrl) ? "/images/about/tinashe.jpg" : Model.Founder1ImageUrl)" alt="Founder 1" style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--accent-orange); box-shadow: var(--shadow-raised-sm); margin-bottom: 8px;" onerror="this.src='/images/about/tinashe.jpg'" />
                         <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Current Photo</span>
                     </div>
 
@@ -104,7 +104,7 @@
 
                 <div style="display: grid; grid-template-columns: 140px 1fr; gap: 24px; align-items: start; margin-bottom: 18px;">
                     <div style="text-align: center;">
-                        <img src="@Model.Founder2ImageUrl" alt="Founder 2" style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--accent-orange); box-shadow: var(--shadow-raised-sm); margin-bottom: 8px;" onerror="this.src='/images/avatars/default.png'" />
+                        <img src="@(string.IsNullOrWhiteSpace(Model.Founder2ImageUrl) ? "/images/about/jeffery.jpg" : Model.Founder2ImageUrl)" alt="Founder 2" style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--accent-orange); box-shadow: var(--shadow-raised-sm); margin-bottom: 8px;" onerror="this.src='/images/about/jeffery.jpg'" />
                         <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Current Photo</span>
                     </div>
 

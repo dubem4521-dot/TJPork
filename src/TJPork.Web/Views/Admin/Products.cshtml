@@ -52,14 +52,20 @@
     <div class="tjp-card" style="padding: 0; overflow: hidden;">
         <!-- Bulk Controls Bar -->
         <div style="padding: 14px 24px; background: var(--bg-surface); border-bottom: 1px solid #EEF2F6; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-            <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <span id="selectedCountBadge" class="tjp-chip" style="display: none; background: var(--accent-orange-light); color: var(--accent-orange); font-weight: 700; padding: 4px 10px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-check-double"></i> <span id="selectedCountNum">0</span> Selected
+                </span>
+
                 <select name="actionType" id="bulkActionSelect" class="tjp-select" style="width: auto; padding: 6px 12px; font-size: 0.85rem;">
                     <option value="">Bulk Actions...</option>
+                    <option value="delete">Delete Selected</option>
                     <option value="activate">Activate Selected</option>
                     <option value="deactivate">Deactivate Selected</option>
+                    <option value="feature">Feature on Homepage</option>
+                    <option value="unfeature">Remove from Homepage</option>
                     <option value="adjustPrice">Adjust Price (% Change)</option>
                     <option value="changeCategory">Change Category</option>
-                    <option value="delete">Delete Selected</option>
                 </select>
 
                 <input type="number" name="priceAdjustPercent" id="bulkPriceAdjustInput" placeholder="e.g. 10 or -10" class="tjp-input" style="display: none; width: 120px; padding: 6px 10px; font-size: 0.85rem;" />
@@ -71,7 +77,9 @@
                     }
                 </select>
 
-                <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm">Apply to Selected</button>
+                <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="font-weight: 600;">
+                    <i class="fa-solid fa-bolt"></i> Apply to Selected
+                </button>
             </div>
 
             <span style="font-size: 0.85rem; color: var(--text-muted);">@Model.Products.Count Total Products</span>
@@ -141,6 +149,9 @@
                                     <a asp-action="EditProduct" asp-route-id="@item.Id" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="padding: 6px 10px;" title="Edit Product">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
+                                    <button type="button" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="padding: 6px 10px; color: var(--danger);" title="Delete Product" onclick="deleteSingleProduct(@item.Id, '@item.Name')">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -150,3 +161,19 @@
         </div>
     </div>
 </form>
+
+<form id="singleDeleteForm" asp-action="DeleteProduct" method="post" style="display: none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="singleDeleteId" value="" />
+</form>
+
+@section Scripts {
+    <script>
+        function deleteSingleProduct(id, name) {
+            if (confirm(`Are you sure you want to permanently delete '${name}'? This cannot be undone.`)) {
+                document.getElementById('singleDeleteId').value = id;
+                document.getElementById('singleDeleteForm').submit();
+            }
+        }
+    </script>
+}

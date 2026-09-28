@@ -79,6 +79,24 @@
                         <span>Store Settings</span>
                     </a>
                 </li>
+                <li class="admin-nav-item">
+                    <a asp-controller="Admin" asp-action="AboutUs" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "AboutUs" ? "active" : "")">
+                        <i class="fa-solid fa-file-pen"></i>
+                        <span>About Us CMS</span>
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a asp-controller="Admin" asp-action="Admins" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Admin") == true && ViewContext.RouteData.Values["Action"]?.ToString() != "Index" ? "active" : "")">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Admin Team</span>
+                    </a>
+                </li>
+                <li class="admin-nav-item">
+                    <a asp-controller="Admin" asp-action="Profile" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Profile" ? "active" : "")">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>My Profile</span>
+                    </a>
+                </li>
             </ul>
 
             <div style="padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">

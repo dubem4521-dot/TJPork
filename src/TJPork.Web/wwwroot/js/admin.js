@@ -34,12 +34,31 @@ function initAdminBulkActions() {
     const actionSelect = document.querySelector('#bulkActionSelect');
     const priceAdjustInput = document.querySelector('#bulkPriceAdjustInput');
     const categorySelect = document.querySelector('#bulkCategorySelect');
+    const selectedBadge = document.querySelector('#selectedCountBadge');
+    const selectedNum = document.querySelector('#selectedCountNum');
+
+    function updateSelectedCount() {
+        const checkedCount = document.querySelectorAll('.product-checkbox:checked').length;
+        if (selectedBadge && selectedNum) {
+            selectedNum.textContent = checkedCount;
+            selectedBadge.style.display = checkedCount > 0 ? 'inline-flex' : 'none';
+        }
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = itemCheckboxes.length > 0 && checkedCount === itemCheckboxes.length;
+            selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < itemCheckboxes.length;
+        }
+    }
 
     if (selectAllCheckbox && itemCheckboxes.length > 0) {
         selectAllCheckbox.addEventListener('change', function () {
             itemCheckboxes.forEach(cb => {
                 cb.checked = selectAllCheckbox.checked;
             });
+            updateSelectedCount();
+        });
+
+        itemCheckboxes.forEach(cb => {
+            cb.addEventListener('change', updateSelectedCount);
         });
     }
 
@@ -48,6 +67,31 @@ function initAdminBulkActions() {
             const val = this.value;
             if (priceAdjustInput) priceAdjustInput.style.display = val === 'adjustPrice' ? 'block' : 'none';
             if (categorySelect) categorySelect.style.display = val === 'changeCategory' ? 'block' : 'none';
+        });
+    }
+
+    if (bulkActionForm) {
+        bulkActionForm.addEventListener('submit', function (e) {
+            const checkedCount = document.querySelectorAll('.product-checkbox:checked').length;
+            if (checkedCount === 0) {
+                e.preventDefault();
+                alert('Please select at least one product using the checkboxes.');
+                return;
+            }
+
+            const actionVal = actionSelect ? actionSelect.value : '';
+            if (!actionVal) {
+                e.preventDefault();
+                alert('Please choose an action from the Bulk Actions dropdown.');
+                return;
+            }
+
+            if (actionVal === 'delete') {
+                const confirmed = confirm(`Are you sure you want to permanently delete the ${checkedCount} selected product(s)? This cannot be undone.`);
+                if (!confirmed) {
+                    e.preventDefault();
+                }
+            }
         });
     }
 }

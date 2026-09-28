@@ -1,0 +1,223 @@
+﻿@model TJPork.Web.ViewModels.AboutUsEditViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "About Us CMS";
+}
+
+<div style="max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px;">
+    <!-- Top Action Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+            <h1 style="font-size: 1.8rem; margin: 0 0 6px;">About Us Content &amp; Media CMS</h1>
+            <p style="color: var(--text-secondary); margin: 0;">Customize the public About Founders page: text, photos, credentials, values, and brand mission.</p>
+        </div>
+        <a asp-controller="Home" asp-action="About" target="_blank" class="tjp-btn tjp-btn-neu">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Preview Live Page
+        </a>
+    </div>
+
+    <form asp-action="AboutUs" method="post" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Founder1ImageUrl" />
+        <input type="hidden" asp-for="Founder2ImageUrl" />
+
+        <div style="display: flex; flex-direction: column; gap: 28px;">
+            <!-- 1. Header & Story Intro -->
+            <div class="tjp-card" style="padding: 28px;">
+                <h3 style="font-size: 1.25rem; margin-bottom: 20px; border-bottom: 1px solid #EEF2F6; padding-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-heading" style="color: var(--accent-orange);"></i> 1. Page Header &amp; Introduction
+                </h3>
+
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 20px;">
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Super-Title Tagline</label>
+                        <input asp-for="HeaderSuperTitle" class="tjp-input" placeholder="e.g. The Artisanal Standard" />
+                    </div>
+
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Main Page Headline</label>
+                        <input asp-for="HeaderTitle" class="tjp-input" placeholder="e.g. Two Founders. One Passion for Premium Pork." />
+                    </div>
+                </div>
+
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Story / Intro Paragraph</label>
+                    <textarea asp-for="HeaderIntro" class="tjp-textarea" rows="3" placeholder="Explain the origin story and vision..."></textarea>
+                </div>
+            </div>
+
+            <!-- 2. Founder 1 -->
+            <div class="tjp-card" style="padding: 28px;">
+                <h3 style="font-size: 1.25rem; margin-bottom: 20px; border-bottom: 1px solid #EEF2F6; padding-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-user-tie" style="color: var(--accent-orange);"></i> 2. First Founder Profile &amp; Photo
+                </h3>
+
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 24px; align-items: start; margin-bottom: 18px;">
+                    <div style="text-align: center;">
+                        <img src="@Model.Founder1ImageUrl" alt="Founder 1" style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--accent-orange); box-shadow: var(--shadow-raised-sm); margin-bottom: 8px;" onerror="this.src='/images/avatars/default.png'" />
+                        <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Current Photo</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div class="tjp-input-group" style="margin-bottom: 0;">
+                            <label class="tjp-label">Upload Replacement Photo (JPEG, PNG, WEBP)</label>
+                            <input type="file" name="founder1ImageFile" class="tjp-input" accept=".jpg,.jpeg,.png,.webp" style="padding: 7px 12px;" />
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="tjp-input-group" style="margin-bottom: 0;">
+                                <label class="tjp-label">Founder Name</label>
+                                <input asp-for="Founder1Name" class="tjp-input" placeholder="e.g. Tinashe" />
+                            </div>
+
+                            <div class="tjp-input-group" style="margin-bottom: 0;">
+                                <label class="tjp-label">Role / Job Title</label>
+                                <input asp-for="Founder1Role" class="tjp-input" placeholder="e.g. Co-Founder & Head of Ethical Sourcing" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Founder 1 Bio / Background</label>
+                    <textarea asp-for="Founder1Bio" class="tjp-textarea" rows="4"></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Badge Tag #1</label>
+                        <input asp-for="Founder1Badge1" class="tjp-input" placeholder="e.g. Pasture Genetics" />
+                    </div>
+
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Badge Tag #2</label>
+                        <input asp-for="Founder1Badge2" class="tjp-input" placeholder="e.g. Farm Direct" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Founder 2 -->
+            <div class="tjp-card" style="padding: 28px;">
+                <h3 style="font-size: 1.25rem; margin-bottom: 20px; border-bottom: 1px solid #EEF2F6; padding-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-user-gear" style="color: var(--accent-orange);"></i> 3. Second Founder / Partner Profile &amp; Photo
+                </h3>
+
+                <div style="display: grid; grid-template-columns: 140px 1fr; gap: 24px; align-items: start; margin-bottom: 18px;">
+                    <div style="text-align: center;">
+                        <img src="@Model.Founder2ImageUrl" alt="Founder 2" style="width: 120px; height: 120px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--accent-orange); box-shadow: var(--shadow-raised-sm); margin-bottom: 8px;" onerror="this.src='/images/avatars/default.png'" />
+                        <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Current Photo</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div class="tjp-input-group" style="margin-bottom: 0;">
+                            <label class="tjp-label">Upload Replacement Photo (JPEG, PNG, WEBP)</label>
+                            <input type="file" name="founder2ImageFile" class="tjp-input" accept=".jpg,.jpeg,.png,.webp" style="padding: 7px 12px;" />
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div class="tjp-input-group" style="margin-bottom: 0;">
+                                <label class="tjp-label">Founder Name</label>
+                                <input asp-for="Founder2Name" class="tjp-input" placeholder="e.g. Jeffery" />
+                            </div>
+
+                            <div class="tjp-input-group" style="margin-bottom: 0;">
+                                <label class="tjp-label">Role / Job Title</label>
+                                <input asp-for="Founder2Role" class="tjp-input" placeholder="e.g. Co-Founder & Master Charcutier" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Founder 2 Bio / Background</label>
+                    <textarea asp-for="Founder2Bio" class="tjp-textarea" rows="4"></textarea>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Badge Tag #1</label>
+                        <input asp-for="Founder2Badge1" class="tjp-input" placeholder="e.g. Hardwood Smoke" />
+                    </div>
+
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Badge Tag #2</label>
+                        <input asp-for="Founder2Badge2" class="tjp-input" placeholder="e.g. Small-Batch Spices" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Three Core Values -->
+            <div class="tjp-card" style="padding: 28px;">
+                <h3 style="font-size: 1.25rem; margin-bottom: 20px; border-bottom: 1px solid #EEF2F6; padding-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-hand-holding-heart" style="color: var(--accent-orange);"></i> 4. Core Values
+                </h3>
+
+                <!-- Value 1 -->
+                <div style="margin-bottom: 20px; background: var(--bg-surface); padding: 18px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm);">
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Value #1 Title</label>
+                        <input asp-for="Value1Title" class="tjp-input" />
+                    </div>
+                    <div class="tjp-input-group" style="margin-bottom: 0;">
+                        <label class="tjp-label">Value #1 Description</label>
+                        <textarea asp-for="Value1Description" class="tjp-textarea" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <!-- Value 2 -->
+                <div style="margin-bottom: 20px; background: var(--bg-surface); padding: 18px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm);">
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Value #2 Title</label>
+                        <input asp-for="Value2Title" class="tjp-input" />
+                    </div>
+                    <div class="tjp-input-group" style="margin-bottom: 0;">
+                        <label class="tjp-label">Value #2 Description</label>
+                        <textarea asp-for="Value2Description" class="tjp-textarea" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <!-- Value 3 -->
+                <div style="background: var(--bg-surface); padding: 18px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm);">
+                    <div class="tjp-input-group">
+                        <label class="tjp-label">Value #3 Title</label>
+                        <input asp-for="Value3Title" class="tjp-input" />
+                    </div>
+                    <div class="tjp-input-group" style="margin-bottom: 0;">
+                        <label class="tjp-label">Value #3 Description</label>
+                        <textarea asp-for="Value3Description" class="tjp-textarea" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Mission Statement -->
+            <div class="tjp-card" style="padding: 28px;">
+                <h3 style="font-size: 1.25rem; margin-bottom: 20px; border-bottom: 1px solid #EEF2F6; padding-bottom: 12px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-bullseye" style="color: var(--accent-orange);"></i> 5. Mission Statement &amp; Quote
+                </h3>
+
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Mission Headline</label>
+                    <input asp-for="MissionTitle" class="tjp-input" />
+                </div>
+
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Mission Quote</label>
+                    <textarea asp-for="MissionQuote" class="tjp-textarea" rows="3"></textarea>
+                </div>
+
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Quote Attribution</label>
+                    <input asp-for="MissionAttribution" class="tjp-input" placeholder="e.g. Tinashe & Jeffery" />
+                </div>
+            </div>
+
+            <!-- Sticky Save Bar -->
+            <div class="tjp-card" style="padding: 20px 28px; position: sticky; bottom: 20px; z-index: 100; display: flex; justify-content: space-between; align-items: center; background: #FFFFFF; box-shadow: var(--shadow-raised-hover);">
+                <span style="font-size: 0.9rem; color: var(--text-muted);"><i class="fa-solid fa-cloud-arrow-up" style="color: var(--accent-orange);"></i> Changes take effect immediately on public site</span>
+                <button type="submit" class="tjp-btn tjp-btn-primary tjp-btn-lg">
+                    <i class="fa-solid fa-floppy-disk"></i> Save About Us Content
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,115 @@
+﻿@model TJPork.Web.ViewModels.AdminProfileViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "My Profile";
+}
+
+<div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px;">
+    <!-- Profile Header Banner -->
+    <div style="display: flex; align-items: center; gap: 24px; padding: 28px; background: #FFFFFF; border-radius: var(--radius-lg); box-shadow: var(--shadow-raised); border: 1px solid rgba(255,255,255,0.8);">
+        <img src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/avatars/default.png" : Model.AvatarUrl)" alt="@Model.FullName" style="width: 84px; height: 84px; border-radius: var(--radius-full); object-fit: cover; border: 3px solid var(--accent-orange); box-shadow: var(--shadow-raised-sm);" onerror="this.src='/images/avatars/default.png'" />
+        <div>
+            <h1 style="font-size: 1.8rem; margin: 0 0 6px;">@Model.FullName</h1>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <span class="mono" style="color: var(--text-secondary); font-size: 0.95rem;">@Model.Email</span>
+                <span class="tjp-chip" style="font-size: 0.8rem; background: var(--bg-surface);"><i class="fa-solid fa-shield-halved" style="color: var(--accent-orange);"></i> Store Administrator</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Personal Info Card -->
+    <div class="tjp-card" style="padding: 32px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid #EEF2F6; padding-bottom: 14px;">
+            <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--accent-orange-light); color: var(--accent-orange); display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                <i class="fa-solid fa-user-pen"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; margin: 0;">Personal &amp; Contact Details</h2>
+                <span style="font-size: 0.82rem; color: var(--text-secondary);">Update your display name, contact phone, and avatar photo</span>
+            </div>
+        </div>
+
+        <form asp-action="Profile" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" style="color: var(--danger); font-size: 0.88rem; margin-bottom: 16px;"></div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="tjp-input-group">
+                    <label asp-for="FullName" class="tjp-label"></label>
+                    <input asp-for="FullName" class="tjp-input" />
+                    <span asp-validation-for="FullName" style="color: var(--danger); font-size: 0.8rem;"></span>
+                </div>
+
+                <div class="tjp-input-group">
+                    <label asp-for="Email" class="tjp-label"></label>
+                    <input asp-for="Email" class="tjp-input" />
+                    <span asp-validation-for="Email" style="color: var(--danger); font-size: 0.8rem;"></span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="tjp-input-group">
+                    <label asp-for="PhoneNumber" class="tjp-label"></label>
+                    <input asp-for="PhoneNumber" class="tjp-input" placeholder="+27 (0)82 555 1234" />
+                    <span asp-validation-for="PhoneNumber" style="color: var(--danger); font-size: 0.8rem;"></span>
+                </div>
+
+                <div class="tjp-input-group">
+                    <label asp-for="AvatarFile" class="tjp-label"></label>
+                    <input asp-for="AvatarFile" type="file" class="tjp-input" accept=".jpg,.jpeg,.png,.webp" style="padding: 7px 12px;" />
+                    <span asp-validation-for="AvatarFile" style="color: var(--danger); font-size: 0.8rem;"></span>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                <button type="submit" class="tjp-btn tjp-btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i> Save Profile Details
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Change Password Card -->
+    <div class="tjp-card" style="padding: 32px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border-bottom: 1px solid #EEF2F6; padding-bottom: 14px;">
+            <div style="width: 36px; height: 36px; border-radius: var(--radius-sm); background: #EBF5FB; color: #3498DB; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.25rem; margin: 0;">Change Password</h2>
+                <span style="font-size: 0.82rem; color: var(--text-secondary);">Ensure your account remains protected with a strong, distinct password</span>
+            </div>
+        </div>
+
+        <form asp-action="ChangePassword" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="tjp-input-group">
+                <label class="tjp-label">Current Password</label>
+                <input type="password" name="CurrentPassword" class="tjp-input" required />
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="tjp-input-group">
+                    <label class="tjp-label">New Password</label>
+                    <input type="password" name="NewPassword" class="tjp-input" minlength="8" required />
+                </div>
+
+                <div class="tjp-input-group">
+                    <label class="tjp-label">Confirm New Password</label>
+                    <input type="password" name="ConfirmNewPassword" class="tjp-input" minlength="8" required />
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+                <button type="submit" class="tjp-btn tjp-btn-neu" style="color: var(--accent-orange);">
+                    <i class="fa-solid fa-key"></i> Update Password
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

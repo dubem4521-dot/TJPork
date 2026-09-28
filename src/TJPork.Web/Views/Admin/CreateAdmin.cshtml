@@ -1,0 +1,72 @@
+﻿@model TJPork.Web.ViewModels.CreateAdminViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Add New Administrator";
+}
+
+<div style="max-width: 680px; margin: 0 auto;">
+    <div style="margin-bottom: 24px;">
+        <a asp-action="Admins" style="color: var(--text-muted); font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-arrow-left"></i> Back to Admin Team
+        </a>
+        <h1 style="font-size: 2rem; margin-top: 10px;">Add New Administrator</h1>
+        <p style="color: var(--text-secondary);">Provision credentials for a new store manager with full dashboard access.</p>
+    </div>
+
+    <div class="tjp-card" style="padding: 32px;">
+        <form asp-action="CreateAdmin" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" style="color: var(--danger); font-size: 0.88rem; margin-bottom: 16px;"></div>
+
+            <div class="tjp-input-group">
+                <label asp-for="FullName" class="tjp-label"></label>
+                <input asp-for="FullName" class="tjp-input" placeholder="e.g. Sipho Ndlovu" />
+                <span asp-validation-for="FullName" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+
+            <div class="tjp-input-group">
+                <label asp-for="Email" class="tjp-label"></label>
+                <input asp-for="Email" class="tjp-input" placeholder="e.g. manager@tjpork.com" />
+                <span asp-validation-for="Email" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+
+            <div class="tjp-input-group">
+                <label asp-for="PhoneNumber" class="tjp-label"></label>
+                <input asp-for="PhoneNumber" class="tjp-input" placeholder="e.g. +27 (0)82 555 1234" />
+                <span asp-validation-for="PhoneNumber" style="color: var(--danger); font-size: 0.8rem;"></span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="tjp-input-group">
+                    <label asp-for="Password" class="tjp-label"></label>
+                    <input asp-for="Password" class="tjp-input" placeholder="At least 8 characters" />
+                    <span asp-validation-for="Password" style="color: var(--danger); font-size: 0.8rem;"></span>
+                </div>
+
+                <div class="tjp-input-group">
+                    <label asp-for="ConfirmPassword" class="tjp-label"></label>
+                    <input asp-for="ConfirmPassword" class="tjp-input" placeholder="Re-enter password" />
+                    <span asp-validation-for="ConfirmPassword" style="color: var(--danger); font-size: 0.8rem;"></span>
+                </div>
+            </div>
+
+            <div style="background: var(--bg-surface); padding: 16px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm); margin: 20px 0 24px; font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 10px;">
+                <i class="fa-solid fa-circle-info" style="color: var(--accent-orange); margin-top: 3px;"></i>
+                <div>
+                    The new administrator will receive immediate access to product management, customer orders, and store analytics. Password must be at least 8 characters.
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 14px;">
+                <a asp-action="Admins" class="tjp-btn tjp-btn-neu">Cancel</a>
+                <button type="submit" class="tjp-btn tjp-btn-primary">
+                    <i class="fa-solid fa-user-plus"></i> Create Administrator
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -91,6 +91,13 @@
                 <!-- Profile / Auth Button -->
                 @if (SignInManager.IsSignedIn(User))
                 {
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Admin" asp-action="Index" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="border: 2px solid var(--accent-orange); color: var(--accent-orange); font-weight: 700; background: rgba(224, 86, 36, 0.08);" title="Back to Admin Dashboard">
+                            <i class="fa-solid fa-gauge-high"></i>
+                            <span>Admin Dashboard</span>
+                        </a>
+                    }
                     <a asp-controller="Profile" asp-action="Index" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="font-weight: 600;">
                         <i class="fa-solid fa-user-circle"></i>
                         <span>My Account</span>

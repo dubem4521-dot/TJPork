@@ -77,13 +77,43 @@ namespace TJPork.Web.Controllers
             return View(viewModel);
         }
 
-        public IActionResult About()
+        public async Task<IActionResult> About()
         {
-            var model = new AboutViewModel
-            {
-                TinasheBio = "Co-founder & Head of Sourcing. Tinashe has spent over 12 years working directly with regenerative family farms. His commitment to ethical animal welfare, pasture-raised genetics, and transparent farm-to-table traceability ensures only the highest quality heritage pork reaches T&JPork customers.",
-                JefferyBio = "Co-founder & Master Curer. Jeffery is a certified charcutier with deep expertise in traditional dry-curing, hardwood pit smoking, and custom spice blending. Every recipe at T&JPork is developed and tested by Jeffery to guarantee unbeatable tenderness and flavor."
-            };
+            var settings = await _db.StoreSettings
+                .Where(s => s.Group == "AboutUs")
+                .ToDictionaryAsync(s => s.Key, s => s.Value);
+
+            var model = new AboutViewModel();
+
+            if (settings.TryGetValue("AboutUs.HeaderSuperTitle", out var superTitle)) model.HeaderSuperTitle = superTitle;
+            if (settings.TryGetValue("AboutUs.HeaderTitle", out var title)) model.HeaderTitle = title;
+            if (settings.TryGetValue("AboutUs.HeaderIntro", out var intro)) model.HeaderIntro = intro;
+
+            if (settings.TryGetValue("AboutUs.Founder1Name", out var f1Name)) model.Founder1Name = f1Name;
+            if (settings.TryGetValue("AboutUs.Founder1Role", out var f1Role)) model.Founder1Role = f1Role;
+            if (settings.TryGetValue("AboutUs.Founder1Bio", out var f1Bio)) model.Founder1Bio = f1Bio;
+            if (settings.TryGetValue("AboutUs.Founder1ImageUrl", out var f1Img)) model.Founder1ImageUrl = f1Img;
+            if (settings.TryGetValue("AboutUs.Founder1Badge1", out var f1B1)) model.Founder1Badge1 = f1B1;
+            if (settings.TryGetValue("AboutUs.Founder1Badge2", out var f1B2)) model.Founder1Badge2 = f1B2;
+
+            if (settings.TryGetValue("AboutUs.Founder2Name", out var f2Name)) model.Founder2Name = f2Name;
+            if (settings.TryGetValue("AboutUs.Founder2Role", out var f2Role)) model.Founder2Role = f2Role;
+            if (settings.TryGetValue("AboutUs.Founder2Bio", out var f2Bio)) model.Founder2Bio = f2Bio;
+            if (settings.TryGetValue("AboutUs.Founder2ImageUrl", out var f2Img)) model.Founder2ImageUrl = f2Img;
+            if (settings.TryGetValue("AboutUs.Founder2Badge1", out var f2B1)) model.Founder2Badge1 = f2B1;
+            if (settings.TryGetValue("AboutUs.Founder2Badge2", out var f2B2)) model.Founder2Badge2 = f2B2;
+
+            if (settings.TryGetValue("AboutUs.Value1Title", out var v1T)) model.Value1Title = v1T;
+            if (settings.TryGetValue("AboutUs.Value1Description", out var v1D)) model.Value1Description = v1D;
+            if (settings.TryGetValue("AboutUs.Value2Title", out var v2T)) model.Value2Title = v2T;
+            if (settings.TryGetValue("AboutUs.Value2Description", out var v2D)) model.Value2Description = v2D;
+            if (settings.TryGetValue("AboutUs.Value3Title", out var v3T)) model.Value3Title = v3T;
+            if (settings.TryGetValue("AboutUs.Value3Description", out var v3D)) model.Value3Description = v3D;
+
+            if (settings.TryGetValue("AboutUs.MissionTitle", out var mT)) model.MissionTitle = mT;
+            if (settings.TryGetValue("AboutUs.MissionQuote", out var mQ)) model.MissionQuote = mQ;
+            if (settings.TryGetValue("AboutUs.MissionAttribution", out var mA)) model.MissionAttribution = mA;
+
             return View(model);
         }
 

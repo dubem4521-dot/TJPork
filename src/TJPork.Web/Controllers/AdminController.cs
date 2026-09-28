@@ -366,6 +366,16 @@ namespace TJPork.Web.Controllers
                     }
                     break;
 
+                case "feature":
+                    foreach (var p in products) p.IsFeatured = true;
+                    TempData["SuccessMessage"] = $"Set {products.Count} products as Featured on Homepage.";
+                    break;
+
+                case "unfeature":
+                    foreach (var p in products) p.IsFeatured = false;
+                    TempData["SuccessMessage"] = $"Removed {products.Count} products from Homepage Featured.";
+                    break;
+
                 case "adjustPrice":
                     if (priceAdjustPercent.HasValue && priceAdjustPercent.Value != 0)
                     {
@@ -650,6 +660,383 @@ namespace TJPork.Web.Controllers
 
             model.SuccessMessage = "Store configuration and delivery settings updated successfully!";
             return View(model);
+        }
+
+        #endregion
+
+        #region 6. Admin Team Management
+
+        [HttpGet]
+        public async Task<IActionResult> Admins()
+        {
+            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+            var currentUserId = _userManager.GetUserId(User);
+
+            var model = new AdminUserListViewModel
+            {
+                CurrentAdminId = currentUserId ?? string.Empty,
+                Admins = adminUsers.Select(u => new AdminUserItemViewModel
+                {
+                    Id = u.Id,
+                    FullName = u.FullName ?? u.UserName ?? "Admin",
+                    Email = u.Email ?? "",
+                    PhoneNumber = u.PhoneNumber ?? "",
+                    AvatarUrl = string.IsNullOrEmpty(u.AvatarUrl) ? "/images/avatars/default.png" : u.AvatarUrl,
+                    CreatedAt = u.CreatedAt,
+                    IsCurrentAdmin = u.Id == currentUserId
+                }).OrderBy(a => a.FullName).ToList()
+            };
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult CreateAdmin()
+        {
+            return View(new CreateAdminViewModel());
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateAdmin(CreateAdminViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("Email", "A user with this email address already exists.");
+                return View(model);
+            }
+
+            var newAdmin = new ApplicationUser
+            {
+                UserName = model.Email,
+                Email = model.Email,
+                FullName = model.FullName,
+                PhoneNumber = model.PhoneNumber,
+                EmailConfirmed = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var createResult = await _userManager.CreateAsync(newAdmin, model.Password);
+            if (!createResult.Succeeded)
+            {
+                foreach (var err in createResult.Errors)
+                {
+                    ModelState.AddModelError("", err.Description);
+                }
+                return View(model);
+            }
+
+            await _userManager.AddToRoleAsync(newAdmin, "Admin");
+            TempData["SuccessMessage"] = $"New administrator '{model.FullName}' created successfully!";
+            return RedirectToAction(nameof(Admins));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveAdmin(string id)
+        {
+            var currentUserId = _userManager.GetUserId(User);
+            if (id == currentUserId)
+            {
+                TempData["ErrorMessage"] = "You cannot remove your own admin account.";
+                return RedirectToAction(nameof(Admins));
+            }
+
+            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+            if (adminUsers.Count <= 1)
+            {
+                TempData["ErrorMessage"] = "Cannot remove the only remaining administrator.";
+                return RedirectToAction(nameof(Admins));
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "User not found.";
+                return RedirectToAction(nameof(Admins));
+            }
+
+            var roleResult = await _userManager.RemoveFromRoleAsync(user, "Admin");
+            if (roleResult.Succeeded)
+            {
+                TempData["SuccessMessage"] = $"Administrator privileges removed for '{user.FullName}'.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Failed to update administrator role.";
+            }
+
+            return RedirectToAction(nameof(Admins));
+        }
+
+        #endregion
+
+        #region 7. Admin Profile Management
+
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
+            var model = new AdminProfileViewModel
+            {
+                FullName = user.FullName ?? "",
+                Email = user.Email ?? "",
+                PhoneNumber = user.PhoneNumber ?? "",
+                AvatarUrl = string.IsNullOrEmpty(user.AvatarUrl) ? "/images/avatars/default.png" : user.AvatarUrl
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(AdminProfileViewModel model, Microsoft.AspNetCore.Http.IFormFile? avatarFile)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
+            if (!ModelState.IsValid)
+            {
+                model.AvatarUrl = user.AvatarUrl;
+                return View(model);
+            }
+
+            if (avatarFile != null && avatarFile.Length > 0)
+            {
+                if (!IsValidImageFile(avatarFile, out var error))
+                {
+                    ModelState.AddModelError("AvatarFile", error);
+                    model.AvatarUrl = user.AvatarUrl;
+                    return View(model);
+                }
+
+                var avatarsFolder = Path.Combine(_env.WebRootPath, "images", "avatars");
+                Directory.CreateDirectory(avatarsFolder);
+                var safeExt = Path.GetExtension(avatarFile.FileName).ToLowerInvariant();
+                var uniqueFileName = Guid.NewGuid().ToString("N") + safeExt;
+                var filePath = Path.Combine(avatarsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await avatarFile.CopyToAsync(fileStream);
+                }
+
+                user.AvatarUrl = "/images/avatars/" + uniqueFileName;
+            }
+
+            user.FullName = model.FullName;
+            user.PhoneNumber = model.PhoneNumber;
+
+            if (!string.Equals(user.Email, model.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var existingUser = await _userManager.FindByEmailAsync(model.Email);
+                if (existingUser != null && existingUser.Id != user.Id)
+                {
+                    ModelState.AddModelError("Email", "This email address is already in use.");
+                    model.AvatarUrl = user.AvatarUrl;
+                    return View(model);
+                }
+
+                user.Email = model.Email;
+                user.UserName = model.Email;
+            }
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                foreach (var err in updateResult.Errors)
+                {
+                    ModelState.AddModelError("", err.Description);
+                }
+                model.AvatarUrl = user.AvatarUrl;
+                return View(model);
+            }
+
+            await _signInManager.RefreshSignInAsync(user);
+            TempData["SuccessMessage"] = "Profile details updated successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(AdminChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Please fill in all password fields accurately.";
+                return RedirectToAction(nameof(Profile));
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
+            var changeResult = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (!changeResult.Succeeded)
+            {
+                TempData["ErrorMessage"] = string.Join("; ", changeResult.Errors.Select(e => e.Description));
+                return RedirectToAction(nameof(Profile));
+            }
+
+            await _signInManager.RefreshSignInAsync(user);
+            TempData["SuccessMessage"] = "Password changed successfully!";
+            return RedirectToAction(nameof(Profile));
+        }
+
+        #endregion
+
+        #region 8. About Us CMS
+
+        [HttpGet]
+        public async Task<IActionResult> AboutUs()
+        {
+            var settings = await _db.StoreSettings
+                .Where(s => s.Group == "AboutUs")
+                .ToDictionaryAsync(s => s.Key, s => s.Value);
+
+            var model = new AboutUsEditViewModel();
+
+            if (settings.TryGetValue("AboutUs.HeaderSuperTitle", out var superTitle)) model.HeaderSuperTitle = superTitle;
+            if (settings.TryGetValue("AboutUs.HeaderTitle", out var title)) model.HeaderTitle = title;
+            if (settings.TryGetValue("AboutUs.HeaderIntro", out var intro)) model.HeaderIntro = intro;
+
+            if (settings.TryGetValue("AboutUs.Founder1Name", out var f1Name)) model.Founder1Name = f1Name;
+            if (settings.TryGetValue("AboutUs.Founder1Role", out var f1Role)) model.Founder1Role = f1Role;
+            if (settings.TryGetValue("AboutUs.Founder1Bio", out var f1Bio)) model.Founder1Bio = f1Bio;
+            if (settings.TryGetValue("AboutUs.Founder1ImageUrl", out var f1Img)) model.Founder1ImageUrl = f1Img;
+            if (settings.TryGetValue("AboutUs.Founder1Badge1", out var f1B1)) model.Founder1Badge1 = f1B1;
+            if (settings.TryGetValue("AboutUs.Founder1Badge2", out var f1B2)) model.Founder1Badge2 = f1B2;
+
+            if (settings.TryGetValue("AboutUs.Founder2Name", out var f2Name)) model.Founder2Name = f2Name;
+            if (settings.TryGetValue("AboutUs.Founder2Role", out var f2Role)) model.Founder2Role = f2Role;
+            if (settings.TryGetValue("AboutUs.Founder2Bio", out var f2Bio)) model.Founder2Bio = f2Bio;
+            if (settings.TryGetValue("AboutUs.Founder2ImageUrl", out var f2Img)) model.Founder2ImageUrl = f2Img;
+            if (settings.TryGetValue("AboutUs.Founder2Badge1", out var f2B1)) model.Founder2Badge1 = f2B1;
+            if (settings.TryGetValue("AboutUs.Founder2Badge2", out var f2B2)) model.Founder2Badge2 = f2B2;
+
+            if (settings.TryGetValue("AboutUs.Value1Title", out var v1T)) model.Value1Title = v1T;
+            if (settings.TryGetValue("AboutUs.Value1Description", out var v1D)) model.Value1Description = v1D;
+            if (settings.TryGetValue("AboutUs.Value2Title", out var v2T)) model.Value2Title = v2T;
+            if (settings.TryGetValue("AboutUs.Value2Description", out var v2D)) model.Value2Description = v2D;
+            if (settings.TryGetValue("AboutUs.Value3Title", out var v3T)) model.Value3Title = v3T;
+            if (settings.TryGetValue("AboutUs.Value3Description", out var v3D)) model.Value3Description = v3D;
+
+            if (settings.TryGetValue("AboutUs.MissionTitle", out var mT)) model.MissionTitle = mT;
+            if (settings.TryGetValue("AboutUs.MissionQuote", out var mQ)) model.MissionQuote = mQ;
+            if (settings.TryGetValue("AboutUs.MissionAttribution", out var mA)) model.MissionAttribution = mA;
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AboutUs(AboutUsEditViewModel model, Microsoft.AspNetCore.Http.IFormFile? founder1ImageFile, Microsoft.AspNetCore.Http.IFormFile? founder2ImageFile)
+        {
+            var aboutFolder = Path.Combine(_env.WebRootPath, "images", "about");
+            Directory.CreateDirectory(aboutFolder);
+
+            // Handle Founder 1 Image Upload
+            if (founder1ImageFile != null && founder1ImageFile.Length > 0)
+            {
+                if (IsValidImageFile(founder1ImageFile, out var error))
+                {
+                    var safeExt = Path.GetExtension(founder1ImageFile.FileName).ToLowerInvariant();
+                    var fileName = "founder1_" + Guid.NewGuid().ToString("N")[..8] + safeExt;
+                    var filePath = Path.Combine(aboutFolder, fileName);
+                    using var stream = new FileStream(filePath, FileMode.Create);
+                    await founder1ImageFile.CopyToAsync(stream);
+                    model.Founder1ImageUrl = "/images/about/" + fileName;
+                }
+                else
+                {
+                    ModelState.AddModelError("Founder1ImageFile", error);
+                }
+            }
+
+            // Handle Founder 2 Image Upload
+            if (founder2ImageFile != null && founder2ImageFile.Length > 0)
+            {
+                if (IsValidImageFile(founder2ImageFile, out var error))
+                {
+                    var safeExt = Path.GetExtension(founder2ImageFile.FileName).ToLowerInvariant();
+                    var fileName = "founder2_" + Guid.NewGuid().ToString("N")[..8] + safeExt;
+                    var filePath = Path.Combine(aboutFolder, fileName);
+                    using var stream = new FileStream(filePath, FileMode.Create);
+                    await founder2ImageFile.CopyToAsync(stream);
+                    model.Founder2ImageUrl = "/images/about/" + fileName;
+                }
+                else
+                {
+                    ModelState.AddModelError("Founder2ImageFile", error);
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var entries = new Dictionary<string, string>
+            {
+                { "AboutUs.HeaderSuperTitle", model.HeaderSuperTitle },
+                { "AboutUs.HeaderTitle", model.HeaderTitle },
+                { "AboutUs.HeaderIntro", model.HeaderIntro },
+
+                { "AboutUs.Founder1Name", model.Founder1Name },
+                { "AboutUs.Founder1Role", model.Founder1Role },
+                { "AboutUs.Founder1Bio", model.Founder1Bio },
+                { "AboutUs.Founder1ImageUrl", model.Founder1ImageUrl },
+                { "AboutUs.Founder1Badge1", model.Founder1Badge1 },
+                { "AboutUs.Founder1Badge2", model.Founder1Badge2 },
+
+                { "AboutUs.Founder2Name", model.Founder2Name },
+                { "AboutUs.Founder2Role", model.Founder2Role },
+                { "AboutUs.Founder2Bio", model.Founder2Bio },
+                { "AboutUs.Founder2ImageUrl", model.Founder2ImageUrl },
+                { "AboutUs.Founder2Badge1", model.Founder2Badge1 },
+                { "AboutUs.Founder2Badge2", model.Founder2Badge2 },
+
+                { "AboutUs.Value1Title", model.Value1Title },
+                { "AboutUs.Value1Description", model.Value1Description },
+                { "AboutUs.Value2Title", model.Value2Title },
+                { "AboutUs.Value2Description", model.Value2Description },
+                { "AboutUs.Value3Title", model.Value3Title },
+                { "AboutUs.Value3Description", model.Value3Description },
+
+                { "AboutUs.MissionTitle", model.MissionTitle },
+                { "AboutUs.MissionQuote", model.MissionQuote },
+                { "AboutUs.MissionAttribution", model.MissionAttribution }
+            };
+
+            foreach (var kvp in entries)
+            {
+                var setting = await _db.StoreSettings.FirstOrDefaultAsync(s => s.Key == kvp.Key);
+                if (setting == null)
+                {
+                    _db.StoreSettings.Add(new StoreSetting
+                    {
+                        Key = kvp.Key,
+                        Value = kvp.Value ?? "",
+                        Group = "AboutUs",
+                        Description = kvp.Key
+                    });
+                }
+                else
+                {
+                    setting.Value = kvp.Value ?? "";
+                }
+            }
+
+            await _db.SaveChangesAsync();
+            TempData["SuccessMessage"] = "About Us content and photos updated successfully!";
+            return RedirectToAction(nameof(AboutUs));
         }
 
         #endregion

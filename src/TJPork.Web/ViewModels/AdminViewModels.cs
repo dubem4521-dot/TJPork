@@ -181,4 +181,104 @@ namespace TJPork.Web.ViewModels
 
         public string? SuccessMessage { get; set; }
     }
+
+    public class AdminUserItemViewModel
+    {
+        public string Id { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string AvatarUrl { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
+        public bool IsCurrentAdmin { get; set; }
+    }
+
+    public class AdminUserListViewModel
+    {
+        public List<AdminUserItemViewModel> Admins { get; set; } = new List<AdminUserItemViewModel>();
+        public string CurrentAdminId { get; set; } = string.Empty;
+    }
+
+    public class CreateAdminViewModel
+    {
+        [Required(ErrorMessage = "Full name is required")]
+        [StringLength(100)]
+        [Display(Name = "Full Name")]
+        public string FullName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email address is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [Display(Name = "Admin Email Address")]
+        public string Email { get; set; } = string.Empty;
+
+        [Phone]
+        [Display(Name = "Phone Number")]
+        public string? PhoneNumber { get; set; }
+
+        [Required(ErrorMessage = "Password is required")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Temporary Password")]
+        public string Password { get; set; } = string.Empty;
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm Password")]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+
+    public class AdminProfileViewModel
+    {
+        [Required(ErrorMessage = "Full name is required")]
+        [StringLength(100)]
+        [Display(Name = "Full Name")]
+        public string FullName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email address is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [Display(Name = "Email Address")]
+        public string Email { get; set; } = string.Empty;
+
+        [Phone]
+        [Display(Name = "Phone Number")]
+        public string? PhoneNumber { get; set; }
+
+        [Display(Name = "Current Avatar Photo URL")]
+        public string? AvatarUrl { get; set; }
+
+        [Display(Name = "Upload New Avatar")]
+        public IFormFile? AvatarFile { get; set; }
+
+        public string? SuccessMessage { get; set; }
+    }
+
+    public class AdminChangePasswordViewModel
+    {
+        [Required(ErrorMessage = "Current password is required")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Current Password")]
+        public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "New password is required")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long")]
+        [DataType(DataType.Password)]
+        [Display(Name = "New Password")]
+        public string NewPassword { get; set; } = string.Empty;
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm New Password")]
+        [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
+        public string ConfirmNewPassword { get; set; } = string.Empty;
+    }
+
+    public class AboutUsEditViewModel : AboutViewModel
+    {
+        [Display(Name = "Upload New Photo for Founder 1")]
+        public IFormFile? Founder1ImageFile { get; set; }
+
+        [Display(Name = "Upload New Photo for Founder 2")]
+        public IFormFile? Founder2ImageFile { get; set; }
+
+        public string? SuccessMessage { get; set; }
+    }
 }

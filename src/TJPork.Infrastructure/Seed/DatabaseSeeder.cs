@@ -17,28 +17,48 @@ namespace TJPork.Infrastructure.Seed
     {
         public static async Task SeedAsync(TJPorkDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            // Ensure Database and Tables are created (handles existing databases like Supabase PostgreSQL)
+            // Ensure Database and Application Tables are created
             if (db.Database.GetService<IDatabaseCreator>() is IRelationalDatabaseCreator databaseCreator)
             {
+                bool ourTablesExist = false;
                 try
                 {
-                    if (!await databaseCreator.ExistsAsync())
-                    {
-                        await databaseCreator.CreateAsync();
-                    }
+                    using var command = db.Database.GetDbConnection().CreateCommand();
+                    var isPg = db.Database.ProviderName?.Contains("Npgsql", StringComparison.OrdinalIgnoreCase) == true;
+                    command.CommandText = isPg
+                        ? "SELECT 1 FROM information_schema.tables WHERE LOWER(table_name) = 'aspnetroles' LIMIT 1;"
+                        : "SELECT 1 FROM sqlite_master WHERE type='table' AND LOWER(name)='aspnetroles' LIMIT 1;";
 
-                    if (!await databaseCreator.HasTablesAsync())
+                    if (db.Database.GetDbConnection().State != System.Data.ConnectionState.Open)
                     {
+                        await db.Database.OpenConnectionAsync();
+                    }
+                    var result = await command.ExecuteScalarAsync();
+                    ourTablesExist = result != null;
+                }
+                catch
+                {
+                    ourTablesExist = false;
+                }
+
+                if (!ourTablesExist)
+                {
+                    try
+                    {
+                        if (!await databaseCreator.ExistsAsync())
+                        {
+                            await databaseCreator.CreateAsync();
+                        }
                         await databaseCreator.CreateTablesAsync();
                     }
-                }
-                catch (Npgsql.PostgresException ex) when (ex.SqlState == "42P07")
-                {
-                    // Table already exists, safe to ignore
-                }
-                catch (Exception)
-                {
-                    await db.Database.EnsureCreatedAsync();
+                    catch (Npgsql.PostgresException ex) when (ex.SqlState == "42P07")
+                    {
+                        // Table already created concurrently
+                    }
+                    catch (Exception)
+                    {
+                        await db.Database.EnsureCreatedAsync();
+                    }
                 }
             }
             else

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using TJPork.Core.Entities;
 using TJPork.Core.Enums;
 using TJPork.Infrastructure.Data;
@@ -15,8 +17,34 @@ namespace TJPork.Infrastructure.Seed
     {
         public static async Task SeedAsync(TJPorkDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            // Ensure Database is created
-            await db.Database.EnsureCreatedAsync();
+            // Ensure Database and Tables are created (handles existing databases like Supabase PostgreSQL)
+            if (db.Database.GetService<IDatabaseCreator>() is IRelationalDatabaseCreator databaseCreator)
+            {
+                try
+                {
+                    if (!await databaseCreator.ExistsAsync())
+                    {
+                        await databaseCreator.CreateAsync();
+                    }
+
+                    if (!await databaseCreator.HasTablesAsync())
+                    {
+                        await databaseCreator.CreateTablesAsync();
+                    }
+                }
+                catch (Npgsql.PostgresException ex) when (ex.SqlState == "42P07")
+                {
+                    // Table already exists, safe to ignore
+                }
+                catch (Exception)
+                {
+                    await db.Database.EnsureCreatedAsync();
+                }
+            }
+            else
+            {
+                await db.Database.EnsureCreatedAsync();
+            }
 
             // 1. Seed Roles
             var roles = new[] { "Admin", "Customer" };

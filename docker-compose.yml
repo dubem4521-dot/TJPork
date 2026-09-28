@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   tjpork-web:
+    image: rustytoothpickk/tjpork-app:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -11,11 +12,13 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/tjpork.db
+      - ConnectionStrings__Redis=tjpork-redis:6379
       - EmailSettings__SmtpHost=tjpork-mailhog
       - EmailSettings__SmtpPort=1025
       - EmailSettings__FromEmail=orders@tjpork.com
     volumes:
       - tjpork-data:/app/data
+      - tjpork-images:/app/wwwroot/images
     depends_on:
       - tjpork-mailhog
       - tjpork-redis
@@ -36,3 +39,4 @@ services:
 
 volumes:
   tjpork-data:
+  tjpork-images:

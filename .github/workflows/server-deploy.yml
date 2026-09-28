@@ -23,7 +23,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: 22
           script: |
-            cd ~/tjpork-app
+            cd /srv/share/docker/tjpork-app
             docker compose pull
             docker compose up -d
       

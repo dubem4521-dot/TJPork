@@ -12,6 +12,7 @@ using TJPork.Core.Enums;
 using TJPork.Core.Interfaces;
 using TJPork.Infrastructure.Data;
 using TJPork.Infrastructure.Identity;
+using TJPork.Infrastructure.Services;
 using TJPork.Web.ViewModels;
 
 namespace TJPork.Web.Controllers
@@ -26,6 +27,7 @@ namespace TJPork.Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IWebHostEnvironment _env;
+        private readonly IFileStorageService _fileStorageService;
 
         public AdminController(
             TJPorkDbContext db,
@@ -34,7 +36,8 @@ namespace TJPork.Web.Controllers
             IAnalyticsService analyticsService,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            IFileStorageService fileStorageService)
         {
             _db = db;
             _productService = productService;
@@ -43,6 +46,7 @@ namespace TJPork.Web.Controllers
             _userManager = userManager;
             _signInManager = signInManager;
             _env = env;
+            _fileStorageService = fileStorageService;
         }
 
         #region Authentication
@@ -198,15 +202,7 @@ namespace TJPork.Web.Controllers
                     return View(model);
                 }
 
-                var uploadsFolder = Path.Combine(_env.WebRootPath, "images", "products");
-                Directory.CreateDirectory(uploadsFolder);
-                var safeExt = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
-                var uniqueFileName = Guid.NewGuid().ToString() + safeExt;
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using var fileStream = new FileStream(filePath, FileMode.Create);
-                await model.ImageFile.CopyToAsync(fileStream);
-                imageUrl = "/images/products/" + uniqueFileName;
+                imageUrl = await _fileStorageService.SaveFileAsync(model.ImageFile, "products");
             }
 
             var product = new Product
@@ -286,15 +282,7 @@ namespace TJPork.Web.Controllers
                     return View(model);
                 }
 
-                var uploadsFolder = Path.Combine(_env.WebRootPath, "images", "products");
-                Directory.CreateDirectory(uploadsFolder);
-                var safeExt = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
-                var uniqueFileName = Guid.NewGuid().ToString() + safeExt;
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                using var fileStream = new FileStream(filePath, FileMode.Create);
-                await model.ImageFile.CopyToAsync(fileStream);
-                product.ImageUrl = "/images/products/" + uniqueFileName;
+                product.ImageUrl = await _fileStorageService.SaveFileAsync(model.ImageFile, "products");
             }
             else if (!string.IsNullOrEmpty(model.ImageUrl))
             {
@@ -818,18 +806,7 @@ namespace TJPork.Web.Controllers
                     return View(model);
                 }
 
-                var avatarsFolder = Path.Combine(_env.WebRootPath, "images", "avatars");
-                Directory.CreateDirectory(avatarsFolder);
-                var safeExt = Path.GetExtension(avatarFile.FileName).ToLowerInvariant();
-                var uniqueFileName = Guid.NewGuid().ToString("N") + safeExt;
-                var filePath = Path.Combine(avatarsFolder, uniqueFileName);
-
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await avatarFile.CopyToAsync(fileStream);
-                }
-
-                user.AvatarUrl = "/images/avatars/" + uniqueFileName;
+                user.AvatarUrl = await _fileStorageService.SaveFileAsync(avatarFile, "avatars");
             }
 
             user.FullName = model.FullName;
@@ -948,20 +925,12 @@ namespace TJPork.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AboutUs(AboutUsEditViewModel model, Microsoft.AspNetCore.Http.IFormFile? founder1ImageFile, Microsoft.AspNetCore.Http.IFormFile? founder2ImageFile)
         {
-            var aboutFolder = Path.Combine(_env.WebRootPath, "images", "about");
-            Directory.CreateDirectory(aboutFolder);
-
             // Handle Founder 1 Image Upload
             if (founder1ImageFile != null && founder1ImageFile.Length > 0)
             {
                 if (IsValidImageFile(founder1ImageFile, out var error))
                 {
-                    var safeExt = Path.GetExtension(founder1ImageFile.FileName).ToLowerInvariant();
-                    var fileName = "founder1_" + Guid.NewGuid().ToString("N")[..8] + safeExt;
-                    var filePath = Path.Combine(aboutFolder, fileName);
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await founder1ImageFile.CopyToAsync(stream);
-                    model.Founder1ImageUrl = "/images/about/" + fileName;
+                    model.Founder1ImageUrl = await _fileStorageService.SaveFileAsync(founder1ImageFile, "about");
                 }
                 else
                 {
@@ -981,12 +950,7 @@ namespace TJPork.Web.Controllers
             {
                 if (IsValidImageFile(founder2ImageFile, out var error))
                 {
-                    var safeExt = Path.GetExtension(founder2ImageFile.FileName).ToLowerInvariant();
-                    var fileName = "founder2_" + Guid.NewGuid().ToString("N")[..8] + safeExt;
-                    var filePath = Path.Combine(aboutFolder, fileName);
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await founder2ImageFile.CopyToAsync(stream);
-                    model.Founder2ImageUrl = "/images/about/" + fileName;
+                    model.Founder2ImageUrl = await _fileStorageService.SaveFileAsync(founder2ImageFile, "about");
                 }
                 else
                 {

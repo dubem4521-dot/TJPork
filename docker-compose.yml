@@ -11,8 +11,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Data Source=/app/data/tjpork.db
+      - ConnectionStrings__DefaultConnection=${DATABASE_URL:-Data Source=/app/data/tjpork.db}
       - ConnectionStrings__Redis=tjpork-redis:6379
+      - Supabase__Url=${SUPABASE_URL:-}
+      - Supabase__Key=${SUPABASE_KEY:-}
+      - Supabase__Bucket=${SUPABASE_BUCKET:-tjpork-images}
       - EmailSettings__SmtpHost=tjpork-mailhog
       - EmailSettings__SmtpPort=1025
       - EmailSettings__FromEmail=orders@tjpork.com

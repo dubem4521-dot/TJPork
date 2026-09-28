@@ -14,12 +14,23 @@ using TJPork.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Add Database Context (SQLite for cross-platform ease & out-of-the-box local execution)
+// 1. Add Database Context (Supabase PostgreSQL in production / SQLite local fallback)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? builder.Configuration["DATABASE_URL"]
     ?? "Data Source=tjpork.db";
 
 builder.Services.AddDbContext<TJPorkDbContext>(options =>
-    options.UseSqlite(connectionString, b => b.MigrationsAssembly("TJPork.Infrastructure")));
+{
+    if (DbConnectionHelper.IsPostgreSql(connectionString))
+    {
+        var pgConnection = DbConnectionHelper.FormatPostgreSqlConnectionString(connectionString);
+        options.UseNpgsql(pgConnection, b => b.MigrationsAssembly("TJPork.Infrastructure"));
+    }
+    else
+    {
+        options.UseSqlite(connectionString, b => b.MigrationsAssembly("TJPork.Infrastructure"));
+    }
+});
 
 // 2. Add ASP.NET Core Identity with Role Support
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -75,7 +86,8 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-// 5. Register Domain & Infrastructure Services
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IFileStorageService, SupabaseFileStorageService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();

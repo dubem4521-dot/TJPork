@@ -8,9 +8,7 @@ Artisanal heritage pork and smoked meats, sold online. Real shop, running on a h
 
 ## What This Is
 
-A small ecommerce site for a real business. ASP.NET Core backend, Docker for deployment, Supabase for the database and image storage, Tailscale Funnel for public access.
-
-Built to be a functional store and a DevOps portfolio piece at the same time.
+A small ecommerce site for a real business, premium, pasture-raised artisanal pork products. It allows customers to browse cuts of pork, add items to their cart, select a delivery date, and place orders. It also includes an admin dashboard for managing inventory, tracking orders, and updating store information.
 
 ---
 
@@ -29,48 +27,6 @@ Built to be a functional store and a DevOps portfolio piece at the same time.
 
 ---
 
-## Architecture
-
-```
-                              ┌──────────────────────┐
-                              │      Visitor          │
-                              │  (browser, phone)     │
-                              └──────────┬────────────┘
-                                         │ HTTPS
-                                         ▼
-                              ┌──────────────────────┐
-                              │  Tailscale Funnel    │
-                              │  Public HTTPS endpoint│
-                              └──────────┬────────────┘
-                                         │ Tunnel
-                                         ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  Home server (HP t520, DietPi)                                  │
-│                                                                 │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │  Docker network                                          │   │
-│  │                                                          │   │
-│  │  ┌────────────────┐    ┌──────────┐   ┌──────────────┐   │   │
-│  │  │ tjpork-web     │    │ redis    │   │ mailhog      │   │   │
-│  │  │ ASP.NET Core   │    │ (dev)    │   │ (dev only)   │   │   │
-│  │  │ port 8080      │    │ port 6379│   │ port 8025    │   │   │
-│  │  └───────┬────────┘    └──────────┘   └──────────────┘   │   │
-│  │          │                                                │   │
-│  └──────────┼────────────────────────────────────────────────┘   │
-│             │                                                    │
-└─────────────┼────────────────────────────────────────────────────┘
-              │
-              │ HTTPS
-              ▼
-   ┌──────────────────────┐    ┌──────────────────────┐
-   │ Supabase Postgres    │    │ Supabase Storage      │
-   │ Products, orders,    │    │ Product images        │
-   │ users, categories    │    │ (public bucket)       │
-   └──────────────────────┘    └──────────────────────┘
-```
-
----
-
 ## Repo Layout
 
 ```
@@ -79,11 +35,6 @@ TJPork/
         workflows/
             build-and-push.yml
             deploy.yml
-    docs/
-        journal/
-            18, 2026,09,28 TJPork moves to Supabase, database and storage.md
-            19, 2026,09,28 Four bugs from the Supabase migration.md
-            20, 2026,09,28 TJPork goes public via Tailscale Funnel.md
     src/
         TJPork.Core/
         TJPork.Infrastructure/
@@ -192,25 +143,7 @@ dotnet test
 
 ---
 
-## Known Gaps
 
-Things that are works in progress or known limitations:
-
-- **Email sending is not wired to a real provider yet.** MailHog catches emails in dev; production currently sends none.
-- **Rate limiting on login and checkout is missing.** The login form is publicly reachable.
-- **Container runs as root.** Adding a non root user is a low priority hardening item.
-- **Image tags use `latest` in some places.** Pinning versions is on the roadmap.
-- **No custom domain yet.** The site is reachable via a `.ts.net` URL.
-
----
-
-## Journal
-
-The `docs/journal/` folder contains a chronological record of how this app was built and deployed. Entries are dated and kept in the order they were written, including mistakes and false starts.
-
-Worth reading if you want to see the debugging process, not just the final code.
-
----
 
 ## License
 

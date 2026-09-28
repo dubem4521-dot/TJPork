@@ -33,8 +33,8 @@ namespace TJPork.Tests
             // Assert
             Assert.Equal(190.00m, cart.Subtotal);
             Assert.Equal(65.00m, cart.DeliveryFee);
-            Assert.Equal(28.50m, cart.TaxAmount); // 15% of 190.00 = 28.50
-            Assert.Equal(283.50m, cart.Total); // 190.00 + 65.00 + 28.50
+            Assert.Equal(24.78m, cart.TaxAmount); // 15% inclusive of 190.00: Math.Round(190 * 15 / 115, 2) = 24.78
+            Assert.Equal(255.00m, cart.Total); // 190.00 + 65.00 (VAT is already included in subtotal)
         }
 
         [Fact]
@@ -49,8 +49,8 @@ namespace TJPork.Tests
             // Assert
             Assert.Equal(550.00m, cart.Subtotal);
             Assert.Equal(0.00m, cart.DeliveryFee);
-            Assert.Equal(82.50m, cart.TaxAmount); // 15% of 550.00
-            Assert.Equal(632.50m, cart.Total);
+            Assert.Equal(71.74m, cart.TaxAmount); // 15% inclusive of 550.00: Math.Round(550 * 15 / 115, 2) = 71.74
+            Assert.Equal(550.00m, cart.Total); // Free delivery, VAT included
         }
 
         [Fact]

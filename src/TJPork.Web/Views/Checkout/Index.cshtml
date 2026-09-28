@@ -13,7 +13,7 @@
     <form asp-action="Index" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
 
-        <div style="display: grid; grid-template-columns: 1fr 400px; gap: 36px; align-items: start;">
+        <div class="checkout-layout-grid">
             <!-- Left: 2-Step Form -->
             <div style="display: flex; flex-direction: column; gap: 30px;">
                 <!-- STEP 1: Delivery Details -->
@@ -176,7 +176,7 @@
                         <span class="mono">@(Model.Cart.DeliveryFee == 0 ? "FREE" : "R" + Model.Cart.DeliveryFee.ToString("F2"))</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--text-secondary);">
-                        <span>VAT (15%):</span>
+                        <span>Includes 15% VAT:</span>
                         <span class="mono">R@(Model.Cart.TaxAmount.ToString("F2"))</span>
                     </div>
                     @if (Model.Cart.DiscountAmount > 0)

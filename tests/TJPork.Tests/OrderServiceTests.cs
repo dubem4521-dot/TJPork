@@ -130,5 +130,43 @@ namespace TJPork.Tests
             Assert.Equal(PaymentStatus.Paid, updated.PaymentStatus); // COD marked paid upon delivery
             Assert.NotNull(updated.DeliveredAt);
         }
+
+        [Fact]
+        public async Task OrderService_CreateOrder_ThrowsWhenRequestedQuantityExceedsStock()
+        {
+            // Arrange
+            var db = CreateInMemoryDbContext();
+            var mockEmail = new Mock<IEmailService>();
+            var service = new OrderService(db, mockEmail.Object);
+
+            var product = new Product
+            {
+                Id = 1,
+                Name = "Applewood Smoked Bacon",
+                Slug = "applewood-smoked-bacon",
+                Price = 115.00m,
+                StockQuantity = 2,
+                IsActive = true
+            };
+            db.Products.Add(product);
+            await db.SaveChangesAsync();
+
+            var cart = new Cart();
+            cart.AddItem(1, product.Name, product.Slug, product.Price, 5, "/img.jpg", "500g");
+
+            var order = new Order
+            {
+                CustomerName = "Max",
+                CustomerEmail = "max@tjpork.com",
+                CustomerPhone = "+27 82 555 1234",
+                ShippingAddress = "12 Main St",
+                City = "Cape Town",
+                PostalCode = "8001"
+            };
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateOrderAsync(order, cart));
+            Assert.Contains("Insufficient stock", ex.Message);
+        }
     }
 }

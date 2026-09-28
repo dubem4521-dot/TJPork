@@ -141,36 +141,54 @@
             </button>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
-            @foreach (var review in Model.CustomerReviews)
-            {
-                <div class="tjp-card" style="box-shadow: var(--shadow-raised-sm); background: var(--bg-surface); display: flex; flex-direction: column; justify-content: space-between;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                            <div style="color: #F1C40F; font-size: 0.95rem;">
-                                @for (int s = 1; s <= 5; s++)
+        @if (!Model.CustomerReviews.Any())
+        {
+            <div style="text-align: center; padding: 40px 20px;">
+                <div style="width: 56px; height: 56px; border-radius: var(--radius-full); background: var(--accent-orange-light); color: var(--accent-orange); display: inline-flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-bottom: 16px;">
+                    <i class="fa-solid fa-comments"></i>
+                </div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 8px;">No Customer Reviews Yet</h3>
+                <p style="color: var(--text-secondary); max-width: 520px; margin: 0 auto 20px; font-size: 0.95rem;">
+                    Be among the first to taste our small-batch heritage cuts and share your culinary impressions with fellow food lovers!
+                </p>
+                <a asp-controller="Shop" asp-action="Index" class="tjp-btn tjp-btn-primary tjp-btn-sm">
+                    <i class="fa-solid fa-drumstick-bite"></i> Taste the Craft
+                </a>
+            </div>
+        }
+        else
+        {
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+                @foreach (var review in Model.CustomerReviews)
+                {
+                    <div class="tjp-card" style="box-shadow: var(--shadow-raised-sm); background: var(--bg-surface); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <div style="color: #F1C40F; font-size: 0.95rem;">
+                                    @for (int s = 1; s <= 5; s++)
+                                    {
+                                        <i class="fa-solid fa-star" style="@(s <= review.Rating ? "" : "color: #CBD5E1;")"></i>
+                                    }
+                                </div>
+                                @if (review.IsVerifiedBuyer)
                                 {
-                                    <i class="fa-solid fa-star" style="@(s <= review.Rating ? "" : "color: #CBD5E1;")"></i>
+                                    <span style="font-size: 0.75rem; color: var(--accent-green); font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
                                 }
                             </div>
-                            @if (review.IsVerifiedBuyer)
-                            {
-                                <span style="font-size: 0.75rem; color: var(--accent-green); font-weight: 700;"><i class="fa-solid fa-circle-check"></i> Verified Buyer</span>
-                            }
+                            <h4 style="font-size: 1.05rem; margin-bottom: 8px; color: var(--text-primary);">"@review.Title"</h4>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
+                                @review.Comment
+                            </p>
                         </div>
-                        <h4 style="font-size: 1.05rem; margin-bottom: 8px; color: var(--text-primary);">"@review.Title"</h4>
-                        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 16px;">
-                            @review.Comment
-                        </p>
-                    </div>
 
-                    <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(218,225,233,0.6); padding-top: 12px; font-size: 0.82rem; color: var(--text-muted);">
-                        <span style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-user-check" style="color: var(--accent-orange); margin-right: 6px;"></i>@review.CustomerName</span>
-                        <span>@review.CreatedAt.ToString("MMM dd, yyyy")</span>
+                        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(218,225,233,0.6); padding-top: 12px; font-size: 0.82rem; color: var(--text-muted);">
+                            <span style="font-weight: 600; color: var(--text-primary);"><i class="fa-solid fa-user-check" style="color: var(--accent-orange); margin-right: 6px;"></i>@review.CustomerName</span>
+                            <span>@review.CreatedAt.ToString("MMM dd, yyyy")</span>
+                        </div>
                     </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        }
     </section>
 </div>
 

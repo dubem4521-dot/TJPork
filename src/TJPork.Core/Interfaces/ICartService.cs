@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using TJPork.Core.Models;
 
 namespace TJPork.Core.Interfaces
@@ -6,6 +7,7 @@ namespace TJPork.Core.Interfaces
     {
         Cart GetCart();
         void AddToCart(int productId, int quantity = 1);
+        Task AddToCartAsync(int productId, int quantity = 1);
         void UpdateQuantity(int productId, int quantity);
         void RemoveFromCart(int productId);
         void ClearCart();

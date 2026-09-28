@@ -52,7 +52,12 @@ namespace TJPork.Web.Services
 
         public void AddToCart(int productId, int quantity = 1)
         {
-            var product = _productService.GetProductByIdAsync(productId).GetAwaiter().GetResult();
+            AddToCartAsync(productId, quantity).GetAwaiter().GetResult();
+        }
+
+        public async System.Threading.Tasks.Task AddToCartAsync(int productId, int quantity = 1)
+        {
+            var product = await _productService.GetProductByIdAsync(productId);
             if (product == null || !product.IsActive) return;
 
             var cart = GetCart();
@@ -66,6 +71,7 @@ namespace TJPork.Web.Services
                 product.WeightDescription
             );
 
+            RecalculateCoupon(cart);
             SaveCart(cart);
         }
 
@@ -73,6 +79,7 @@ namespace TJPork.Web.Services
         {
             var cart = GetCart();
             cart.UpdateQuantity(productId, quantity);
+            RecalculateCoupon(cart);
             SaveCart(cart);
         }
 
@@ -80,7 +87,55 @@ namespace TJPork.Web.Services
         {
             var cart = GetCart();
             cart.RemoveItem(productId);
+            RecalculateCoupon(cart);
             SaveCart(cart);
+        }
+
+        private void RecalculateCoupon(Cart cart)
+        {
+            if (string.IsNullOrEmpty(cart.CouponCode) || cart.Items.Count == 0)
+            {
+                cart.CouponCode = null;
+                cart.DiscountAmount = 0m;
+                return;
+            }
+
+            if (cart.CouponCode.StartsWith("PORK10"))
+            {
+                if (cart.Subtotal > 200m)
+                {
+                    cart.DiscountAmount = Math.Round(cart.Subtotal * 0.10m, 2);
+                }
+                else
+                {
+                    cart.CouponCode = null;
+                    cart.DiscountAmount = 0m;
+                }
+            }
+            else if (cart.CouponCode.StartsWith("FREESHIP"))
+            {
+                if (cart.Subtotal > 150m)
+                {
+                    cart.DiscountAmount = cart.DeliveryFee;
+                }
+                else
+                {
+                    cart.CouponCode = null;
+                    cart.DiscountAmount = 0m;
+                }
+            }
+            else if (cart.CouponCode.StartsWith("TJPORK50"))
+            {
+                if (cart.Subtotal > 300m)
+                {
+                    cart.DiscountAmount = 50.00m;
+                }
+                else
+                {
+                    cart.CouponCode = null;
+                    cart.DiscountAmount = 0m;
+                }
+            }
         }
 
         public void ClearCart()

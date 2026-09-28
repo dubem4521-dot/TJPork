@@ -57,7 +57,21 @@ namespace TJPork.Infrastructure.Services
 
             order.DeliveryStatus = OrderStatus.Processing;
 
-            // Populate Order Items
+            // 1. Strict Stock Availability Check
+            foreach (var item in cart.Items)
+            {
+                var product = await _db.Products.FindAsync(item.ProductId);
+                if (product == null || !product.IsActive)
+                {
+                    throw new InvalidOperationException($"The cut '{item.ProductName}' is no longer available.");
+                }
+                if (product.StockQuantity < item.Quantity)
+                {
+                    throw new InvalidOperationException($"Insufficient stock for '{product.Name}'. Only {product.StockQuantity} packs available (requested {item.Quantity}).");
+                }
+            }
+
+            // 2. Populate Order Items and decrement stock
             foreach (var item in cart.Items)
             {
                 order.Items.Add(new OrderItem
@@ -70,12 +84,10 @@ namespace TJPork.Infrastructure.Services
                     ProductImageUrl = item.ImageUrl
                 });
 
-                // Decrement inventory
                 var product = await _db.Products.FindAsync(item.ProductId);
                 if (product != null)
                 {
                     product.StockQuantity -= item.Quantity;
-                    if (product.StockQuantity < 0) product.StockQuantity = 0;
                 }
             }
 

@@ -24,7 +24,7 @@
     }
     else
     {
-        <div style="display: grid; grid-template-columns: 1fr 380px; gap: 36px; align-items: start;">
+        <div class="checkout-layout-grid">
             <!-- Left: Items Table -->
             <div>
                 <!-- Free Shipping Progress -->
@@ -116,7 +116,7 @@
                     </div>
 
                     <div style="display: flex; justify-content: space-between; font-size: 0.95rem; color: var(--text-secondary);">
-                        <span>VAT (15%):</span>
+                        <span>Includes 15% VAT:</span>
                         <span class="mono" style="font-weight: 600; color: var(--text-primary);">R@(Model.Cart.TaxAmount.ToString("F2"))</span>
                     </div>
 

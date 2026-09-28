@@ -86,7 +86,7 @@ namespace TJPork.Infrastructure.Services
             body.AppendLine($"<h3>Total Revenue: R{order.TotalAmount:F2}</h3>");
             body.AppendLine("</div></body></html>");
 
-            var ownerEmails = new[] { "tinashe@tjfork.com", "jeffery@tjfork.com" };
+            var ownerEmails = new[] { "tinashe@tjpork.com" };
             foreach (var email in ownerEmails)
             {
                 await SendGeneralEmailAsync(email, subject, body.ToString());

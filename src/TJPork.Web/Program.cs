@@ -25,13 +25,16 @@ builder.Services.AddDbContext<TJPorkDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     // Password configuration
-    options.Password.RequireDigit = false;
+    options.Password.RequireDigit = true;
     options.Password.RequireLowercase = false;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequireUppercase = false;
-    options.Password.RequiredLength = 6;
+    options.Password.RequiredLength = 8;
     options.User.RequireUniqueEmail = true;
     options.SignIn.RequireConfirmedAccount = false;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
 })
 .AddEntityFrameworkStores<TJPorkDbContext>()
 .AddDefaultTokenProviders();
@@ -46,8 +49,22 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
-// 4. Configure Session State for Shopping Cart
-builder.Services.AddDistributedMemoryCache();
+// 4. Configure Distributed Cache & Session State (Redis if configured, fallback to In-Memory)
+var redisConnection = builder.Configuration.GetConnectionString("Redis") 
+    ?? builder.Configuration["REDIS_CONNECTION"];
+if (!string.IsNullOrEmpty(redisConnection))
+{
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = redisConnection;
+        options.InstanceName = "TJPork_";
+    });
+}
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);

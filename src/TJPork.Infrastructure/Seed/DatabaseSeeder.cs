@@ -28,14 +28,25 @@ namespace TJPork.Infrastructure.Seed
                 }
             }
 
-            // 2. Seed Admin Users (Tinashe & Jeffery)
-            var tinashe = await userManager.FindByEmailAsync("tinashe@tjfork.com");
+            // 2. Remove any legacy demo accounts
+            var legacyEmails = new[] { "tinashe@tjfork.com", "jeffery@tjfork.com", "customer@tjpork.com" };
+            foreach (var email in legacyEmails)
+            {
+                var legacyUser = await userManager.FindByEmailAsync(email);
+                if (legacyUser != null)
+                {
+                    await userManager.DeleteAsync(legacyUser);
+                }
+            }
+
+            // 3. Seed Admin User: Tinashe
+            var tinashe = await userManager.FindByEmailAsync("tinashe@tjpork.com");
             if (tinashe == null)
             {
                 tinashe = new ApplicationUser
                 {
-                    UserName = "tinashe@tjfork.com",
-                    Email = "tinashe@tjfork.com",
+                    UserName = "tinashe@tjpork.com",
+                    Email = "tinashe@tjpork.com",
                     FullName = "Tinashe",
                     EmailConfirmed = true,
                     PhoneNumber = "+27 (0)82 234 5678",
@@ -52,59 +63,36 @@ namespace TJPork.Infrastructure.Seed
                 }
             }
 
-            var jeffery = await userManager.FindByEmailAsync("jeffery@tjfork.com");
-            if (jeffery == null)
+            // 4. Seed Customer User: Max
+            var customerMax = await userManager.FindByEmailAsync("max@tjpork.com");
+            if (customerMax == null)
             {
-                jeffery = new ApplicationUser
+                customerMax = new ApplicationUser
                 {
-                    UserName = "jeffery@tjfork.com",
-                    Email = "jeffery@tjfork.com",
-                    FullName = "Jeffery",
+                    UserName = "max@tjpork.com",
+                    Email = "max@tjpork.com",
+                    FullName = "Max",
                     EmailConfirmed = true,
-                    PhoneNumber = "+27 (0)83 345 6789",
-                    DeliveryAddress = "88 Oaklands Ridge Rd",
-                    City = "Johannesburg",
-                    PostalCode = "2192",
-                    AvatarUrl = "/images/about/jeffery.jpg",
-                    CreatedAt = DateTime.UtcNow.AddMonths(-12)
-                };
-                var result = await userManager.CreateAsync(jeffery, "Admin2026!#Pork");
-                if (result.Succeeded)
-                {
-                    await userManager.AddToRoleAsync(jeffery, "Admin");
-                }
-            }
-
-            // 3. Seed Demo Customer
-            var customer = await userManager.FindByEmailAsync("customer@tjpork.com");
-            if (customer == null)
-            {
-                customer = new ApplicationUser
-                {
-                    UserName = "customer@tjpork.com",
-                    Email = "customer@tjpork.com",
-                    FullName = "Sipho Ndlovu",
-                    EmailConfirmed = true,
-                    PhoneNumber = "+27 (0)84 789 0123",
-                    DeliveryAddress = "742 Kloof Street, Gardens",
+                    PhoneNumber = "+27 (0)82 555 0199",
+                    DeliveryAddress = "12 Bree Street, City Bowl",
                     City = "Cape Town",
                     PostalCode = "8001",
                     AvatarUrl = "/images/avatars/customer1.jpg",
                     CreatedAt = DateTime.UtcNow.AddMonths(-6)
                 };
-                var result = await userManager.CreateAsync(customer, "Customer2026!#Pork");
+                var result = await userManager.CreateAsync(customerMax, "Customer2026!#Max");
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(customer, "Customer");
+                    await userManager.AddToRoleAsync(customerMax, "Customer");
 
-                    // Seed saved address
+                    // Seed default address for Max
                     db.Addresses.Add(new Address
                     {
-                        UserId = customer.Id,
+                        UserId = customerMax.Id,
                         Label = "Home",
-                        RecipientName = "Sipho Ndlovu",
-                        Phone = "+27 (0)84 789 0123",
-                        StreetAddress = "742 Kloof Street, Gardens",
+                        RecipientName = "Max",
+                        Phone = "+27 (0)82 555 0199",
+                        StreetAddress = "12 Bree Street, City Bowl",
                         City = "Cape Town",
                         PostalCode = "8001",
                         IsDefault = true,
@@ -376,71 +364,9 @@ namespace TJPork.Infrastructure.Seed
                 await db.SaveChangesAsync();
             }
 
-            // 6. Seed Reviews
-            if (!await db.Reviews.AnyAsync())
-            {
-                var bacon = await db.Products.FirstAsync(p => p.Slug.Contains("applewood"));
-                var chops = await db.Products.FirstAsync(p => p.Slug.Contains("bone-in"));
-                var sausage = await db.Products.FirstAsync(p => p.Slug.Contains("bratwurst"));
-                var belly = await db.Products.FirstAsync(p => p.Slug.Contains("belly"));
+            // 6. Reviews: Kept clean for real customer feedback (no dummy reviews seeded)
 
-                var reviews = new List<Review>
-                {
-                    new Review
-                    {
-                        ProductId = bacon.Id,
-                        CustomerName = "David van der Merwe",
-                        CustomerEmail = "david.vdm@example.co.za",
-                        Rating = 5,
-                        Title = "The best bacon in South Africa!",
-                        Comment = "Tinashe and Jeffery have completely spoiled other bacon for me. The smoky aroma when it hits the skillet is unbelievable, and it doesn't shrink into water like grocery store brands. 10/10!",
-                        IsVerifiedBuyer = true,
-                        IsApproved = true,
-                        CreatedAt = DateTime.UtcNow.AddDays(-14)
-                    },
-                    new Review
-                    {
-                        ProductId = chops.Id,
-                        CustomerName = "Chef Anika Botha",
-                        CustomerEmail = "anika.botha@bistrocapetown.co.za",
-                        Rating = 5,
-                        Title = "Sensational on the braai",
-                        Comment = "These center-cut chops are sensational. The fat cap crisps up deliciously over the coals and the meat remains tender and juicy without brining.",
-                        IsVerifiedBuyer = true,
-                        IsApproved = true,
-                        CreatedAt = DateTime.UtcNow.AddDays(-10)
-                    },
-                    new Review
-                    {
-                        ProductId = sausage.Id,
-                        CustomerName = "Sipho Ndlovu",
-                        CustomerEmail = "customer@tjpork.com",
-                        Rating = 5,
-                        Title = "Authentic artisanal sausages",
-                        Comment = "Ordered for our weekend family braai in Camps Bay. Everyone asked where I bought these sausages. Seasoning is spot on and the casing had that perfect snap.",
-                        IsVerifiedBuyer = true,
-                        IsApproved = true,
-                        CreatedAt = DateTime.UtcNow.AddDays(-5)
-                    },
-                    new Review
-                    {
-                        ProductId = belly.Id,
-                        CustomerName = "Leanne Joubert",
-                        CustomerEmail = "leanne.j@example.co.za",
-                        Rating = 5,
-                        Title = "Crispiest crackling ever",
-                        Comment = "Followed Jeffery's roasting instructions and got glass-like crackling with melt-in-the-mouth pork belly underneath. Will definitely re-order regularly!",
-                        IsVerifiedBuyer = true,
-                        IsApproved = true,
-                        CreatedAt = DateTime.UtcNow.AddDays(-2)
-                    }
-                };
-
-                await db.Reviews.AddRangeAsync(reviews);
-                await db.SaveChangesAsync();
-            }
-
-            // 7. Seed Initial Sample Orders in ZAR
+            // 7. Seed Initial Sample Orders for Max in ZAR (VAT Inclusive)
             if (!await db.Orders.AnyAsync())
             {
                 var prod1 = await db.Products.FirstAsync(p => p.Slug.Contains("applewood"));
@@ -448,25 +374,25 @@ namespace TJPork.Infrastructure.Seed
                 var prod3 = await db.Products.FirstAsync(p => p.Slug.Contains("bratwurst"));
                 var prod4 = await db.Products.FirstAsync(p => p.Slug.Contains("belly"));
 
-                var custUser = await userManager.FindByEmailAsync("customer@tjpork.com");
+                var custUser = await userManager.FindByEmailAsync("max@tjpork.com");
 
                 var order1 = new Order
                 {
                     OrderNumber = "TJP-2026-104921",
                     UserId = custUser?.Id,
-                    CustomerName = "Sipho Ndlovu",
-                    CustomerEmail = "customer@tjpork.com",
-                    CustomerPhone = "+27 (0)84 789 0123",
-                    ShippingAddress = "742 Kloof Street, Gardens",
+                    CustomerName = "Max",
+                    CustomerEmail = "max@tjpork.com",
+                    CustomerPhone = "+27 (0)82 555 0199",
+                    ShippingAddress = "12 Bree Street, City Bowl",
                     City = "Cape Town",
                     PostalCode = "8001",
                     DeliveryDate = DateTime.UtcNow.AddDays(-3),
                     DeliverySlot = DeliverySlot.Morning,
                     Subtotal = 301.98m,
                     DeliveryFee = 65.00m,
-                    TaxAmount = 45.30m,
+                    TaxAmount = Math.Round(301.98m * 15m / 115m, 2), // 15% VAT included in price
                     DiscountAmount = 0m,
-                    TotalAmount = 412.28m,
+                    TotalAmount = 366.98m, // 301.98 + 65.00
                     PaymentMethod = PaymentMethod.CreditCard,
                     PaymentStatus = PaymentStatus.Paid,
                     DeliveryStatus = OrderStatus.Delivered,
@@ -483,19 +409,19 @@ namespace TJPork.Infrastructure.Seed
                 {
                     OrderNumber = "TJP-2026-108842",
                     UserId = custUser?.Id,
-                    CustomerName = "Sipho Ndlovu",
-                    CustomerEmail = "customer@tjpork.com",
-                    CustomerPhone = "+27 (0)84 789 0123",
-                    ShippingAddress = "742 Kloof Street, Gardens",
+                    CustomerName = "Max",
+                    CustomerEmail = "max@tjpork.com",
+                    CustomerPhone = "+27 (0)82 555 0199",
+                    ShippingAddress = "12 Bree Street, City Bowl",
                     City = "Cape Town",
                     PostalCode = "8001",
                     DeliveryDate = DateTime.UtcNow.AddDays(1),
                     DeliverySlot = DeliverySlot.Afternoon,
                     Subtotal = 545.00m,
                     DeliveryFee = 0m, // Free delivery over R500
-                    TaxAmount = 81.75m,
+                    TaxAmount = Math.Round(545.00m * 15m / 115m, 2),
                     DiscountAmount = 50.00m,
-                    TotalAmount = 576.75m,
+                    TotalAmount = 495.00m, // 545.00 - 50.00
                     PaymentMethod = PaymentMethod.CreditCard,
                     PaymentStatus = PaymentStatus.Paid,
                     DeliveryStatus = OrderStatus.Processing,
@@ -510,20 +436,20 @@ namespace TJPork.Infrastructure.Seed
                 var order3 = new Order
                 {
                     OrderNumber = "TJP-2026-109934",
-                    UserId = null,
-                    CustomerName = "Claire Montgomery",
-                    CustomerEmail = "claire.m@example.co.za",
-                    CustomerPhone = "+27 (0)72 456 1122",
-                    ShippingAddress = "1200 Florida Rd, Morningside",
-                    City = "Durban",
-                    PostalCode = "4001",
+                    UserId = custUser?.Id,
+                    CustomerName = "Max",
+                    CustomerEmail = "max@tjpork.com",
+                    CustomerPhone = "+27 (0)82 555 0199",
+                    ShippingAddress = "12 Bree Street, City Bowl",
+                    City = "Cape Town",
+                    PostalCode = "8001",
                     DeliveryDate = DateTime.UtcNow.AddDays(2),
                     DeliverySlot = DeliverySlot.Evening,
                     Subtotal = 525.00m,
                     DeliveryFee = 0m,
-                    TaxAmount = 78.75m,
+                    TaxAmount = Math.Round(525.00m * 15m / 115m, 2),
                     DiscountAmount = 0m,
-                    TotalAmount = 603.75m,
+                    TotalAmount = 525.00m,
                     PaymentMethod = PaymentMethod.CashOnDelivery,
                     PaymentStatus = PaymentStatus.Pending,
                     DeliveryStatus = OrderStatus.Processing,
@@ -550,7 +476,7 @@ namespace TJPork.Infrastructure.Seed
                     new StoreSetting { Key = "StandardDeliveryFee", Value = "65.00", Description = "Standard flat delivery fee in ZAR", Group = "Delivery" },
                     new StoreSetting { Key = "FreeDeliveryThreshold", Value = "500.00", Description = "Cart value for free delivery in ZAR", Group = "Delivery" },
                     new StoreSetting { Key = "TaxRatePercentage", Value = "15.0", Description = "South African VAT rate percentage", Group = "Payment" },
-                    new StoreSetting { Key = "AdminNotifyEmails", Value = "tinashe@tjfork.com,jeffery@tjfork.com", Description = "Owner notification recipients", Group = "Notifications" }
+                    new StoreSetting { Key = "AdminNotifyEmails", Value = "tinashe@tjpork.com", Description = "Owner notification recipients", Group = "Notifications" }
                 };
 
                 await db.StoreSettings.AddRangeAsync(settings);

@@ -6,11 +6,16 @@
 document.addEventListener('DOMContentLoaded', function () {
     initSearchAutocomplete();
     initCartDrawer();
+    initMobileNavDrawer();
     initHeroSlider();
     initPasswordStrength();
     initReviewModal();
     initNotifications();
 });
+
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+}
 
 /* ==========================================================================
    1. Real-time Search Autocomplete
@@ -129,16 +134,21 @@ function addToCartAjax(productId, quantity, triggerBtn) {
     const formData = new FormData();
     formData.append('productId', productId);
     formData.append('quantity', quantity);
+    const token = getCsrfToken();
+    if (token) formData.append('__RequestVerificationToken', token);
 
     if (triggerBtn) {
         triggerBtn.disabled = true;
         triggerBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Adding...`;
     }
 
+    const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+    if (token) headers['RequestVerificationToken'] = token;
+
     fetch('/Cart/AddToCart', {
         method: 'POST',
         body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        headers: headers
     })
         .then(res => res.json())
         .then(data => {
@@ -175,11 +185,16 @@ function updateCartQuantityAjax(productId, quantity) {
     const formData = new FormData();
     formData.append('productId', productId);
     formData.append('quantity', quantity);
+    const token = getCsrfToken();
+    if (token) formData.append('__RequestVerificationToken', token);
+
+    const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+    if (token) headers['RequestVerificationToken'] = token;
 
     fetch('/Cart/UpdateQuantity', {
         method: 'POST',
         body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        headers: headers
     })
         .then(res => res.json())
         .then(data => {
@@ -196,11 +211,16 @@ function updateCartQuantityAjax(productId, quantity) {
 function removeCartItemAjax(productId) {
     const formData = new FormData();
     formData.append('productId', productId);
+    const token = getCsrfToken();
+    if (token) formData.append('__RequestVerificationToken', token);
+
+    const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+    if (token) headers['RequestVerificationToken'] = token;
 
     fetch('/Cart/RemoveFromCart', {
         method: 'POST',
         body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        headers: headers
     })
         .then(res => res.json())
         .then(data => {
@@ -213,6 +233,34 @@ function removeCartItemAjax(productId) {
                 }
             }
         });
+}
+
+/* ==========================================================================
+   2b. Mobile Navigation Drawer
+   ========================================================================== */
+function initMobileNavDrawer() {
+    const toggleBtn = document.querySelector('#mobileMenuToggle');
+    const overlay = document.querySelector('.tjp-mobile-drawer-overlay');
+    const drawer = document.querySelector('.tjp-mobile-drawer');
+    const closeBtn = document.querySelector('.tjp-mobile-drawer-close');
+
+    function openMobileDrawer() {
+        if (!drawer || !overlay) return;
+        overlay.classList.add('open');
+        drawer.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeMobileDrawer() {
+        if (!drawer || !overlay) return;
+        overlay.classList.remove('open');
+        drawer.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    if (toggleBtn) toggleBtn.addEventListener('click', openMobileDrawer);
+    if (closeBtn) closeBtn.addEventListener('click', closeMobileDrawer);
+    if (overlay) overlay.addEventListener('click', closeMobileDrawer);
 }
 
 function updateCartBadge(count) {

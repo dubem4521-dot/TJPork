@@ -3,9 +3,11 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @inject TJPork.Core.Interfaces.ICartService CartService
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 
 @{
     var currentCart = CartService.GetCart();
+    var requestToken = Antiforgery.GetAndStoreTokens(Context).RequestToken;
 }
 
 <!DOCTYPE html>
@@ -13,6 +15,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="@requestToken" />
     <title>@ViewData["Title"] - T&amp;JPork | Artisanal Heritage Pork</title>
 
     <!-- FontAwesome 6 (No emojis used anywhere) -->
@@ -30,6 +33,11 @@
     <!-- Top Fixed Navigation -->
     <header class="tjp-navbar">
         <div class="tjp-nav-container">
+            <!-- Mobile Menu Toggle Button -->
+            <button type="button" class="tjp-icon-btn tjp-mobile-hamburger" id="mobileMenuToggle" title="Open Navigation Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
             <!-- Brand Logo -->
             <a asp-controller="Home" asp-action="Index" class="tjp-logo">
                 <div class="brand-icon">
@@ -103,6 +111,85 @@
     <main role="main" style="min-height: calc(100vh - 280px);">
         @RenderBody()
     </main>
+
+    <!-- Mobile Navigation Drawer -->
+    <div class="tjp-mobile-drawer-overlay"></div>
+    <div class="tjp-mobile-drawer" id="mobileNavDrawer">
+        <div class="tjp-drawer-header">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div class="brand-icon" style="width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--accent-orange); color: #FFF; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-drumstick-bite"></i>
+                </div>
+                <span style="font-weight: 800; font-size: 1.15rem;">T&amp;J<span style="color: var(--accent-orange);">Pork</span></span>
+            </div>
+            <button type="button" class="tjp-icon-btn tjp-mobile-drawer-close" style="width: 36px; height: 36px;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="tjp-drawer-body">
+            <ul class="tjp-mobile-nav-list" style="list-style: none; display: flex; flex-direction: column; gap: 8px; padding: 10px 0;">
+                <li>
+                    <a asp-controller="Home" asp-action="Index" class="tjp-mobile-nav-link">
+                        <i class="fa-solid fa-house" style="color: var(--accent-orange); width: 22px;"></i>
+                        <span>Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Shop" asp-action="Index" class="tjp-mobile-nav-link">
+                        <i class="fa-solid fa-drumstick-bite" style="color: var(--accent-orange); width: 22px;"></i>
+                        <span>Shop Artisanal Cuts</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Home" asp-action="About" class="tjp-mobile-nav-link">
+                        <i class="fa-solid fa-users" style="color: var(--accent-orange); width: 22px;"></i>
+                        <span>About Founders</span>
+                    </a>
+                </li>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    <li style="border-top: 1px solid #EEF2F6; margin-top: 8px; padding-top: 8px;">
+                        <a asp-controller="Profile" asp-action="Index" class="tjp-mobile-nav-link">
+                            <i class="fa-solid fa-user-circle" style="color: var(--accent-green); width: 22px;"></i>
+                            <span>My Account &amp; Orders</span>
+                        </a>
+                    </li>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <li>
+                            <a asp-controller="Admin" asp-action="Index" class="tjp-mobile-nav-link" style="color: var(--accent-orange); font-weight: 700;">
+                                <i class="fa-solid fa-gauge-high" style="color: var(--accent-orange); width: 22px;"></i>
+                                <span>Owner Dashboard</span>
+                            </a>
+                        </li>
+                    }
+                    <li>
+                        <form asp-controller="Account" asp-action="Logout" method="post" style="margin-top: 8px;">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="width: 100%; color: var(--danger);">
+                                <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                            </button>
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li style="border-top: 1px solid #EEF2F6; margin-top: 8px; padding-top: 8px;">
+                        <a asp-controller="Account" asp-action="Login" class="tjp-mobile-nav-link">
+                            <i class="fa-solid fa-arrow-right-to-bracket" style="color: var(--accent-orange); width: 22px;"></i>
+                            <span>Sign In</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-controller="Account" asp-action="Register" class="tjp-mobile-nav-link">
+                            <i class="fa-solid fa-user-plus" style="color: var(--accent-green); width: 22px;"></i>
+                            <span>Create Account</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
 
     <!-- Cart Slide-Over Drawer -->
     <div class="tjp-cart-drawer-overlay"></div>
@@ -219,7 +306,7 @@
                         <li><a asp-controller="Home" asp-action="About" style="color: #CBD5E1;"><i class="fa-solid fa-chevron-right" style="font-size: 0.75rem; color: var(--accent-orange); margin-right: 6px;"></i> Meet Tinashe &amp; Jeffery</a></li>
                         <li><span style="color: #94A3B8;"><i class="fa-solid fa-shield-halved" style="color: var(--accent-green); margin-right: 6px;"></i> Zero Hormones or Antibiotics</span></li>
                         <li><span style="color: #94A3B8;"><i class="fa-solid fa-truck" style="color: var(--accent-orange); margin-right: 6px;"></i> Temperature-Controlled Delivery</span></li>
-                        <li><span style="color: #94A3B8;"><i class="fa-solid fa-house-chimney" style="color: #3498DB; margin-right: 6px;"></i> Local Austin Farm Partners</span></li>
+                        <li><span style="color: #94A3B8;"><i class="fa-solid fa-house-chimney" style="color: #3498DB; margin-right: 6px;"></i> Franschhoek, Stellenbosch &amp; KZN Partners</span></li>
                     </ul>
                 </div>
 

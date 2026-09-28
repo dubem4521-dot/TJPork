@@ -191,9 +191,17 @@ namespace TJPork.Web.Controllers
             string imageUrl = model.ImageUrl;
             if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
+                if (!IsValidImageFile(model.ImageFile, out var error))
+                {
+                    ModelState.AddModelError("ImageFile", error);
+                    model.AvailableCategories = await _db.Categories.OrderBy(c => c.DisplayOrder).ToListAsync();
+                    return View(model);
+                }
+
                 var uploadsFolder = Path.Combine(_env.WebRootPath, "images", "products");
                 Directory.CreateDirectory(uploadsFolder);
-                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ImageFile.FileName);
+                var safeExt = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
+                var uniqueFileName = Guid.NewGuid().ToString() + safeExt;
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                 using var fileStream = new FileStream(filePath, FileMode.Create);
@@ -271,9 +279,17 @@ namespace TJPork.Web.Controllers
 
             if (model.ImageFile != null && model.ImageFile.Length > 0)
             {
+                if (!IsValidImageFile(model.ImageFile, out var error))
+                {
+                    ModelState.AddModelError("ImageFile", error);
+                    model.AvailableCategories = await _db.Categories.OrderBy(c => c.DisplayOrder).ToListAsync();
+                    return View(model);
+                }
+
                 var uploadsFolder = Path.Combine(_env.WebRootPath, "images", "products");
                 Directory.CreateDirectory(uploadsFolder);
-                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ImageFile.FileName);
+                var safeExt = Path.GetExtension(model.ImageFile.FileName).ToLowerInvariant();
+                var uniqueFileName = Guid.NewGuid().ToString() + safeExt;
                 var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                 using var fileStream = new FileStream(filePath, FileMode.Create);
@@ -593,11 +609,11 @@ namespace TJPork.Web.Controllers
             {
                 StoreName = settings.FirstOrDefault(s => s.Key == "StoreName")?.Value ?? "T&JPork Artisanal Meats",
                 ContactEmail = settings.FirstOrDefault(s => s.Key == "ContactEmail")?.Value ?? "orders@tjpork.com",
-                ContactPhone = settings.FirstOrDefault(s => s.Key == "ContactPhone")?.Value ?? "+1 (555) 835-7675",
-                StandardDeliveryFee = decimal.TryParse(settings.FirstOrDefault(s => s.Key == "StandardDeliveryFee")?.Value, out var df) ? df : 5.99m,
-                FreeDeliveryThreshold = decimal.TryParse(settings.FirstOrDefault(s => s.Key == "FreeDeliveryThreshold")?.Value, out var ft) ? ft : 50.00m,
-                TaxRatePercentage = decimal.TryParse(settings.FirstOrDefault(s => s.Key == "TaxRatePercentage")?.Value, out var tr) ? tr : 5.0m,
-                AdminNotifyEmails = settings.FirstOrDefault(s => s.Key == "AdminNotifyEmails")?.Value ?? "tinashe@tjfork.com,jeffery@tjfork.com"
+                ContactPhone = settings.FirstOrDefault(s => s.Key == "ContactPhone")?.Value ?? "+27 (0)21 835 7675",
+                StandardDeliveryFee = decimal.TryParse(settings.FirstOrDefault(s => s.Key == "StandardDeliveryFee")?.Value, out var df) ? df : 65.00m,
+                FreeDeliveryThreshold = decimal.TryParse(settings.FirstOrDefault(s => s.Key == "FreeDeliveryThreshold")?.Value, out var ft) ? ft : 500.00m,
+                TaxRatePercentage = decimal.TryParse(settings.FirstOrDefault(s => s.Key == "TaxRatePercentage")?.Value, out var tr) ? tr : 15.0m,
+                AdminNotifyEmails = settings.FirstOrDefault(s => s.Key == "AdminNotifyEmails")?.Value ?? "tinashe@tjpork.com"
             };
 
             return View(model);
@@ -634,6 +650,32 @@ namespace TJPork.Web.Controllers
 
             model.SuccessMessage = "Store configuration and delivery settings updated successfully!";
             return View(model);
+        }
+
+        #endregion
+
+        #region Helpers
+
+        private static readonly string[] AllowedImageExtensions = { ".jpg", ".jpeg", ".png", ".webp" };
+        private const long MaxImageSizeBytes = 5 * 1024 * 1024; // 5 MB
+
+        private static bool IsValidImageFile(Microsoft.AspNetCore.Http.IFormFile file, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!AllowedImageExtensions.Contains(ext))
+            {
+                errorMessage = "Only image files (.jpg, .jpeg, .png, .webp) are permitted.";
+                return false;
+            }
+
+            if (file.Length > MaxImageSizeBytes)
+            {
+                errorMessage = "Image file size exceeds the 5MB maximum limit.";
+                return false;
+            }
+
+            return true;
         }
 
         #endregion

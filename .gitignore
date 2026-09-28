@@ -5,3 +5,15 @@ bin/
 obj/
 [Dd]ebug/
 [Rr]elease/
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+
+# Sensitive credentials & environment files
+credentials.txt
+app_credentials.txt
+*.credentials.json
+.env
+appsettings.Development.json

@@ -33,39 +33,36 @@ namespace TJPork.Web.Controllers
                 .Take(8)
                 .ToListAsync();
 
-            var heroSlides = new List<HeroSlide>
+            var heroSlides = new List<HeroSlide>();
+            if (featuredProducts.Any())
             {
-                new HeroSlide
+                foreach (var product in featuredProducts.Take(4))
                 {
-                    Title = "Artisanal Smoked Heritage Bacon",
-                    Subtitle = "Crafted by Tinashe & Jeffery",
-                    Description = "Naturally dry-cured for 7 days with Vermont maple syrup and cold-smoked over natural fragrant applewood.",
-                    Badge = "Staff Selection",
-                    ImageUrl = "/images/hero/hero-bacon.jpg",
-                    ButtonText = "Shop Artisanal Bacon",
-                    ButtonUrl = "/Shop?categoryId=1"
-                },
-                new HeroSlide
-                {
-                    Title = "Prime Heritage Pork Chops",
-                    Subtitle = "Pasture-Raised Berkshire",
-                    Description = "Thick-cut 1.5-inch bone-in chops boasting exceptional marbling, tenderness, and rich culinary flavor.",
-                    Badge = "Butcher Special",
-                    ImageUrl = "/images/hero/hero-chops.jpg",
-                    ButtonText = "Explore Heritage Cuts",
-                    ButtonUrl = "/Shop?categoryId=3"
-                },
-                new HeroSlide
-                {
-                    Title = "Handcrafted Gourmet Sausages",
-                    Subtitle = "Small-Batch Master Recipes",
-                    Description = "Stuffed in natural hog casings with farm-fresh herbs, toasted whole fennel, and roasted garlic.",
-                    Badge = "New Seasonals",
-                    ImageUrl = "/images/hero/hero-sausage.jpg",
-                    ButtonText = "Taste the Craft",
-                    ButtonUrl = "/Shop?categoryId=2"
+                    heroSlides.Add(new HeroSlide
+                    {
+                        Title = product.Name,
+                        Subtitle = product.Category?.Name ?? "Heritage Artisanal Cut",
+                        Description = product.ShortDescription,
+                        Badge = product.DiscountPercentage > 0 ? $"{product.DiscountPercentage}% Off" : "Butcher Special",
+                        ImageUrl = !string.IsNullOrEmpty(product.ImageUrl) ? product.ImageUrl : "/images/hero/hero-bacon.jpg",
+                        ButtonText = $"Shop Now &bull; R{product.FinalPrice:F2}",
+                        ButtonUrl = $"/Shop/Details?slug={product.Slug}"
+                    });
                 }
-            };
+            }
+            else
+            {
+                heroSlides.Add(new HeroSlide
+                {
+                    Title = "Artisanal Heritage Pork",
+                    Subtitle = "Pasture-Raised & Hand-Cured",
+                    Description = "Ethically sourced small-batch cuts prepared by master curers in the Western Cape and KZN Midlands.",
+                    Badge = "Smokehouse Selection",
+                    ImageUrl = "/images/hero/hero-bacon.jpg",
+                    ButtonText = "Explore Catalog",
+                    ButtonUrl = "/Shop"
+                });
+            }
 
             var viewModel = new HomeViewModel
             {

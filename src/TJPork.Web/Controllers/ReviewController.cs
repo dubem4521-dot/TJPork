@@ -59,6 +59,14 @@ namespace TJPork.Web.Controllers
                 customerName = "Artisanal Pork Enthusiast";
             }
 
+            bool isVerified = false;
+            if (!string.IsNullOrEmpty(userId) || !string.IsNullOrEmpty(customerEmail))
+            {
+                isVerified = await _db.Orders.AnyAsync(o => 
+                    (o.UserId == userId || (!string.IsNullOrEmpty(customerEmail) && o.CustomerEmail == customerEmail)) &&
+                    o.Items.Any(i => i.ProductId == model.ProductId));
+            }
+
             var review = new Review
             {
                 ProductId = model.ProductId,
@@ -68,7 +76,7 @@ namespace TJPork.Web.Controllers
                 Rating = Math.Clamp(model.Rating, 1, 5),
                 Title = model.Title,
                 Comment = model.Comment,
-                IsVerifiedBuyer = true,
+                IsVerifiedBuyer = isVerified,
                 IsApproved = true,
                 CreatedAt = DateTime.UtcNow
             };

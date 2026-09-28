@@ -21,19 +21,24 @@ namespace TJPork.Core.Models
     {
         public List<CartItem> Items { get; set; } = new List<CartItem>();
 
+        public decimal FreeDeliveryThreshold { get; set; } = 500.00m;
+        public decimal StandardDeliveryFee { get; set; } = 65.00m;
+
         public decimal Subtotal => Items.Sum(i => i.TotalPrice);
 
-        public decimal DeliveryFee => (Subtotal >= 500m || Items.Count == 0) ? 0m : 65.00m;
+        public decimal DeliveryFee => (Subtotal >= FreeDeliveryThreshold || Items.Count == 0) ? 0m : StandardDeliveryFee;
 
         public decimal TaxRate => 0.15m; // 15% South African VAT
 
-        public decimal TaxAmount => Math.Round(Subtotal * TaxRate, 2);
+        // Under South African SARS regulations, retail consumer prices are VAT-inclusive.
+        // TaxAmount reflects the 15% VAT portion already included in the subtotal.
+        public decimal TaxAmount => Math.Round(Subtotal * 15m / 115m, 2);
 
         public decimal DiscountAmount { get; set; } = 0m;
 
         public string? CouponCode { get; set; }
 
-        public decimal Total => Math.Max(0m, Subtotal + DeliveryFee + TaxAmount - DiscountAmount);
+        public decimal Total => Math.Max(0m, Subtotal + DeliveryFee - DiscountAmount);
 
         public int TotalItemCount => Items.Sum(i => i.Quantity);
 

@@ -14,7 +14,7 @@
     </nav>
 
     <!-- Product Top Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 48px; margin-bottom: 60px;">
+    <div class="product-detail-grid">
         <!-- Left: Product Image -->
         <div class="tjp-card" style="padding: 16px; display: flex; align-items: center; justify-content: center; background: #FFFFFF;">
             <img src="@Model.Product.ImageUrl" alt="@Model.Product.Name" style="width: 100%; max-height: 440px; object-fit: cover; border-radius: var(--radius-md);" onerror="this.src='/images/products/placeholder.jpg'" />

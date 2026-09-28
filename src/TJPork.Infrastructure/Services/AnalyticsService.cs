@@ -33,29 +33,33 @@ namespace TJPork.Infrastructure.Services
             var weekStart = todayStart.AddDays(-(int)todayStart.DayOfWeek);
             var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
-            var orders = await _db.Orders
-                .Include(o => o.Items)
-                .Where(o => o.DeliveryStatus != OrderStatus.Cancelled)
-                .ToListAsync();
+            var validOrdersQuery = _db.Orders.Where(o => o.DeliveryStatus != OrderStatus.Cancelled);
 
+            var totalRevenue = await validOrdersQuery.SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
+            var totalOrdersCount = await validOrdersQuery.CountAsync();
             var totalCustomers = await _userManager.Users.CountAsync();
             var lowStockCount = await _db.Products.CountAsync(p => p.StockQuantity <= 10 && p.IsActive);
 
-            var todayOrders = orders.Where(o => o.CreatedAt >= todayStart).ToList();
-            var weekOrders = orders.Where(o => o.CreatedAt >= weekStart).ToList();
-            var monthOrders = orders.Where(o => o.CreatedAt >= monthStart).ToList();
+            var todayRevenue = await validOrdersQuery.Where(o => o.CreatedAt >= todayStart).SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
+            var todayOrdersCount = await validOrdersQuery.Where(o => o.CreatedAt >= todayStart).CountAsync();
+            var weekRevenue = await validOrdersQuery.Where(o => o.CreatedAt >= weekStart).SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
+            var monthRevenue = await validOrdersQuery.Where(o => o.CreatedAt >= monthStart).SumAsync(o => (decimal?)o.TotalAmount) ?? 0m;
 
-            var totalRevenue = orders.Sum(o => o.TotalAmount);
-            var totalOrdersCount = orders.Count;
-            var avgOrderValue = totalOrdersCount > 0 ? totalRevenue / totalOrdersCount : 0;
+            var avgOrderValue = totalOrdersCount > 0 ? totalRevenue / totalOrdersCount : 0m;
 
-            // 30 Days Sales
+            // 30 Days Sales - fetch only 30 days range
+            var thirtyDaysAgo = todayStart.AddDays(-29);
+            var recent30DayOrders = await validOrdersQuery
+                .Where(o => o.CreatedAt >= thirtyDaysAgo)
+                .Select(o => new { o.CreatedAt, o.TotalAmount })
+                .ToListAsync();
+
             var dailySalesList = new List<DailySalesDto>();
             for (int i = 29; i >= 0; i--)
             {
                 var day = todayStart.AddDays(-i);
                 var nextDay = day.AddDays(1);
-                var dayOrders = orders.Where(o => o.CreatedAt >= day && o.CreatedAt < nextDay).ToList();
+                var dayOrders = recent30DayOrders.Where(o => o.CreatedAt >= day && o.CreatedAt < nextDay).ToList();
 
                 dailySalesList.Add(new DailySalesDto
                 {
@@ -100,10 +104,10 @@ namespace TJPork.Infrastructure.Services
 
             return new DashboardSummaryDto
             {
-                TodayOrdersCount = todayOrders.Count,
-                TodayRevenue = todayOrders.Sum(o => o.TotalAmount),
-                WeekRevenue = weekOrders.Sum(o => o.TotalAmount),
-                MonthRevenue = monthOrders.Sum(o => o.TotalAmount),
+                TodayOrdersCount = todayOrdersCount,
+                TodayRevenue = todayRevenue,
+                WeekRevenue = weekRevenue,
+                MonthRevenue = monthRevenue,
                 TotalRevenue = totalRevenue,
                 TotalOrders = totalOrdersCount,
                 TotalCustomers = totalCustomers,

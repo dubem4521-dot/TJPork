@@ -115,12 +115,20 @@ namespace TJPork.Web.Controllers
                 PaymentMethod = model.PaymentMethod
             };
 
-            var createdOrder = await _orderService.CreateOrderAsync(order, cart);
+            try
+            {
+                var createdOrder = await _orderService.CreateOrderAsync(order, cart);
 
-            // Clear session cart
-            _cartService.ClearCart();
+                // Clear session cart
+                _cartService.ClearCart();
 
-            return RedirectToAction(nameof(Confirmation), new { orderNumber = createdOrder.OrderNumber });
+                return RedirectToAction(nameof(Confirmation), new { orderNumber = createdOrder.OrderNumber });
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(model);
+            }
         }
 
         [HttpGet]

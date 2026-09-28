@@ -24,9 +24,10 @@ namespace TJPork.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddToCart(int productId, int quantity = 1)
+        [ValidateAntiForgeryToken]
+        public async System.Threading.Tasks.Task<IActionResult> AddToCart(int productId, int quantity = 1)
         {
-            _cartService.AddToCart(productId, quantity);
+            await _cartService.AddToCartAsync(productId, quantity);
             var cart = _cartService.GetCart();
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest" || Request.Headers.Accept.ToString().Contains("application/json"))
@@ -45,6 +46,7 @@ namespace TJPork.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult UpdateQuantity(int productId, int quantity)
         {
             _cartService.UpdateQuantity(productId, quantity);
@@ -68,6 +70,7 @@ namespace TJPork.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult RemoveFromCart(int productId)
         {
             _cartService.RemoveFromCart(productId);
@@ -89,6 +92,7 @@ namespace TJPork.Web.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult ClearCart()
         {
             _cartService.ClearCart();

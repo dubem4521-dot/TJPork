@@ -10,18 +10,112 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /* ==========================================================================
-   1. Admin Sidebar Toggle
+   1. Admin Sidebar Toggle & Mobile Responsiveness
    ========================================================================== */
 function initAdminSidebar() {
     const toggleBtn = document.querySelector('#sidebarToggleBtn');
     const sidebar = document.querySelector('.admin-sidebar');
+    const backdrop = document.querySelector('#adminSidebarBackdrop');
 
-    if (toggleBtn && sidebar) {
-        toggleBtn.addEventListener('click', function () {
-            sidebar.classList.toggle('collapsed');
-            sidebar.classList.toggle('open');
+    if (!sidebar) return;
+
+    function isMobile() {
+        return window.innerWidth <= 1024;
+    }
+
+    function closeMobileSidebar() {
+        sidebar.classList.remove('expanded', 'open');
+        if (backdrop) backdrop.classList.remove('active');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            const icon = toggleBtn.querySelector('i');
+            if (icon) {
+                icon.className = 'fa-solid fa-bars';
+            }
+        }
+    }
+
+    function openMobileSidebar() {
+        sidebar.classList.add('expanded', 'open');
+        if (backdrop) backdrop.classList.add('active');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            const icon = toggleBtn.querySelector('i');
+            if (icon) {
+                icon.className = 'fa-solid fa-xmark';
+            }
+        }
+    }
+
+    function toggleSidebar() {
+        if (isMobile()) {
+            if (sidebar.classList.contains('expanded') || sidebar.classList.contains('open')) {
+                closeMobileSidebar();
+            } else {
+                openMobileSidebar();
+            }
+        } else {
+            // Desktop: toggle collapsed state
+            const isCollapsed = sidebar.classList.toggle('collapsed');
+            if (toggleBtn) {
+                toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+            }
+            try {
+                localStorage.setItem('tjp_admin_sidebar_collapsed', isCollapsed ? '1' : '0');
+            } catch (_) {}
+        }
+    }
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleSidebar();
         });
     }
+
+    if (backdrop) {
+        backdrop.addEventListener('click', function () {
+            closeMobileSidebar();
+        });
+    }
+
+    // Auto-close on mobile when clicking any navigation link
+    const navLinks = sidebar.querySelectorAll('.admin-nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function () {
+            if (isMobile()) {
+                closeMobileSidebar();
+            }
+        });
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && isMobile() && (sidebar.classList.contains('expanded') || sidebar.classList.contains('open'))) {
+            closeMobileSidebar();
+        }
+    });
+
+    // Restore desktop preference if previously collapsed
+    if (!isMobile()) {
+        try {
+            if (localStorage.getItem('tjp_admin_sidebar_collapsed') === '1') {
+                sidebar.classList.add('collapsed');
+            }
+        } catch (_) {}
+    }
+
+    // Clear mobile classes if user resizes back to desktop
+    window.addEventListener('resize', function () {
+        if (!isMobile()) {
+            sidebar.classList.remove('expanded', 'open');
+            if (backdrop) backdrop.classList.remove('active');
+            if (toggleBtn) {
+                const icon = toggleBtn.querySelector('i');
+                if (icon) icon.className = 'fa-solid fa-bars';
+            }
+        }
+    });
 }
 
 /* ==========================================================================

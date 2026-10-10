@@ -6,7 +6,7 @@
 
 <!-- Filter Tabs Bar -->
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-    <div style="display: flex; gap: 8px;">
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
         <a asp-action="Orders" asp-route-tab="all" class="tjp-btn tjp-btn-neu tjp-btn-sm @(Model.ActiveTab == "all" ? "active" : "")">
             All Orders (@Model.Orders.Count)
         </a>

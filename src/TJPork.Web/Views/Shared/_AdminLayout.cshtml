@@ -34,105 +34,108 @@
         <!-- Sidebar Navigation -->
         <aside class="admin-sidebar">
             <div class="admin-sidebar-header">
-                <a asp-controller="Admin" asp-action="Index" style="display: flex; align-items: center; gap: 10px; color: #FFFFFF; font-weight: 800; font-size: 1.25rem;">
-                    <div style="width: 34px; height: 34px; border-radius: var(--radius-sm); background: var(--accent-orange); display: flex; align-items: center; justify-content: center;">
+                <a asp-controller="Admin" asp-action="Index" class="admin-brand-link" title="T&J Admin Dashboard">
+                    <div class="admin-brand-icon">
                         <i class="fa-solid fa-gauge-high"></i>
                     </div>
-                    <span>T&amp;J <span style="color: var(--accent-orange);">Admin</span></span>
+                    <span class="admin-brand-text">T&amp;J <span style="color: var(--accent-orange);">Admin</span></span>
                 </a>
             </div>
 
             <ul class="admin-nav">
                 <li class="admin-nav-item">
-                    <a asp-controller="Admin" asp-action="Index" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
+                    <a asp-controller="Admin" asp-action="Index" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" title="Overview">
                         <i class="fa-solid fa-chart-pie"></i>
-                        <span>Overview</span>
+                        <span class="admin-nav-text">Overview</span>
                     </a>
                 </li>
                 <li class="admin-nav-item">
-                    <a asp-controller="Admin" asp-action="Orders" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Orders" ? "active" : "")">
+                    <a asp-controller="Admin" asp-action="Orders" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Orders" ? "active" : "")" title="Orders">
                         <i class="fa-solid fa-clipboard-list"></i>
-                        <span>Orders</span>
+                        <span class="admin-nav-text">Orders</span>
                     </a>
                 </li>
                 <li class="admin-nav-item">
-                    <a asp-controller="Admin" asp-action="Products" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Product") == true ? "active" : "")">
+                    <a asp-controller="Admin" asp-action="Products" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Product") == true ? "active" : "")" title="Products (CRUD)">
                         <i class="fa-solid fa-drumstick-bite"></i>
-                        <span>Products (CRUD)</span>
+                        <span class="admin-nav-text">Products (CRUD)</span>
                     </a>
                 </li>
                 <li class="admin-nav-item">
-                    <a asp-controller="Admin" asp-action="Customers" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Customer") == true ? "active" : "")">
+                    <a asp-controller="Admin" asp-action="Customers" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Customer") == true ? "active" : "")" title="Customers">
                         <i class="fa-solid fa-users"></i>
-                        <span>Customers</span>
+                        <span class="admin-nav-text">Customers</span>
                     </a>
                 </li>
                 <li class="admin-nav-item">
-                    <a asp-controller="Admin" asp-action="Analytics" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Analytics" ? "active" : "")">
+                    <a asp-controller="Admin" asp-action="Analytics" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Analytics" ? "active" : "")" title="Analytics & CSV">
                         <i class="fa-solid fa-chart-line"></i>
-                        <span>Analytics &amp; CSV</span>
+                        <span class="admin-nav-text">Analytics &amp; CSV</span>
                     </a>
                 </li>
                 <li class="admin-nav-item">
-                    <a asp-controller="Admin" asp-action="Settings" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Settings" ? "active" : "")">
+                    <a asp-controller="Admin" asp-action="Settings" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Settings" ? "active" : "")" title="Store Settings">
                         <i class="fa-solid fa-sliders"></i>
-                        <span>Store Settings</span>
+                        <span class="admin-nav-text">Store Settings</span>
                     </a>
                 </li>
                 <li class="admin-nav-item">
-                    <a asp-controller="Admin" asp-action="AboutUs" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "AboutUs" ? "active" : "")">
+                    <a asp-controller="Admin" asp-action="AboutUs" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "AboutUs" ? "active" : "")" title="About Us CMS">
                         <i class="fa-solid fa-file-pen"></i>
-                        <span>About Us CMS</span>
+                        <span class="admin-nav-text">About Us CMS</span>
                     </a>
                 </li>
                 <li class="admin-nav-item">
-                    <a asp-controller="Admin" asp-action="Admins" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Admin") == true && ViewContext.RouteData.Values["Action"]?.ToString() != "Index" ? "active" : "")">
+                    <a asp-controller="Admin" asp-action="Admins" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString()?.Contains("Admin") == true && ViewContext.RouteData.Values["Action"]?.ToString() != "Index" ? "active" : "")" title="Admin Team">
                         <i class="fa-solid fa-user-shield"></i>
-                        <span>Admin Team</span>
+                        <span class="admin-nav-text">Admin Team</span>
                     </a>
                 </li>
                 <li class="admin-nav-item">
-                    <a asp-controller="Admin" asp-action="Profile" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Profile" ? "active" : "")">
+                    <a asp-controller="Admin" asp-action="Profile" class="admin-nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Profile" ? "active" : "")" title="My Profile">
                         <i class="fa-solid fa-id-card"></i>
-                        <span>My Profile</span>
+                        <span class="admin-nav-text">My Profile</span>
                     </a>
                 </li>
             </ul>
 
-            <div style="padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
-                    <img src="@(currentUser?.AvatarUrl ?? "/images/avatars/default.png")" alt="Owner" style="width: 40px; height: 40px; border-radius: var(--radius-full); object-fit: cover; border: 2px solid var(--accent-orange);" />
-                    <div style="overflow: hidden;">
-                        <div style="font-weight: 700; font-size: 0.9rem; color: #FFFFFF; text-overflow: ellipsis; white-space: nowrap;">@ownerName</div>
-                        <div style="font-size: 0.75rem; color: var(--accent-orange); text-overflow: ellipsis; white-space: nowrap;">Co-Founder / Admin</div>
+            <div class="admin-sidebar-footer">
+                <div class="admin-sidebar-user">
+                    <img src="@(currentUser?.AvatarUrl ?? "/images/avatars/default.png")" alt="Owner" class="admin-user-avatar" title="@ownerName" />
+                    <div class="admin-user-details">
+                        <div class="admin-user-name">@ownerName</div>
+                        <div class="admin-user-role">Co-Founder / Admin</div>
                     </div>
                 </div>
 
                 <form asp-controller="Admin" asp-action="Logout" method="post">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm" style="width: 100%; color: #E74C3C; background: rgba(231,76,60,0.1); border-color: rgba(231,76,60,0.3);">
+                    <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm admin-logout-btn" title="Sign Out">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        <span>Sign Out</span>
+                        <span class="admin-logout-text">Sign Out</span>
                     </button>
                 </form>
             </div>
         </aside>
 
+        <!-- Sidebar backdrop for mobile expanded state -->
+        <div id="adminSidebarBackdrop" class="admin-sidebar-backdrop"></div>
+
         <!-- Main Content Area -->
         <div class="admin-main">
             <!-- Top Bar -->
             <header class="admin-topbar">
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <button type="button" id="sidebarToggleBtn" class="tjp-icon-btn" style="width: 40px; height: 40px;">
+                <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+                    <button type="button" id="sidebarToggleBtn" class="tjp-icon-btn admin-toggle-btn" aria-label="Toggle navigation" title="Expand or collapse sidebar" style="width: 40px; height: 40px; flex-shrink: 0;">
                         <i class="fa-solid fa-bars"></i>
                     </button>
-                    <h2 style="font-size: 1.35rem; margin: 0;">@ViewData["Title"]</h2>
+                    <h2 class="admin-topbar-title">@ViewData["Title"]</h2>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
                     <a asp-controller="Home" asp-action="Index" target="_blank" class="tjp-btn tjp-btn-neu tjp-btn-sm" title="View Customer Storefront">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        <span>View Store</span>
+                        <span class="hide-mobile-sm">View Store</span>
                     </a>
                 </div>
             </header>

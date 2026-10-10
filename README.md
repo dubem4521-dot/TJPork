@@ -1,131 +1,156 @@
-# T&JPork 🥩
+# T&JPork
 
-**T&JPork** is a modern online butchery store for premium, pasture-raised artisanal pork products. It allows customers to browse cuts of pork, add items to their cart, select a delivery date, and place orders. It also includes an admin dashboard for managing inventory, tracking orders, and updating store information.
+Artisanal heritage pork and smoked meats, sold online. Real shop, running on a home server.
 
----
-
-## 🌟 Key Features
-
-### For Customers
-- **Product Catalog**: Browse pork cuts by category (Roasts, Chops, Bacon, Sausages, Ribs, etc.) with real-time stock levels and discounts.
-- **Shopping Cart**: View items, calculate subtotals, apply discount codes, and see how much more you need for free delivery.
-- **Easy Checkout**: Choose delivery dates, select morning/afternoon time slots, add special instructions, and pick payment options.
-- **Customer Profiles**: View past orders, track delivery status, manage saved shipping addresses, and receive order notifications.
-- **Reviews**: Leave ratings and reviews on products you purchased.
-
-### For Admins
-- **Inventory & Products**: Add new products, update prices, adjust stock, and upload photos.
-- **Order Management**: View incoming orders, change delivery status (Processing, Packed, Shipped, Delivered), and update payment status.
-- **Store Settings & CMS**: Update "About Us" stories, founder pictures, business hours, and contact details directly from the dashboard.
+**Live site:** https://tjpork.tail0e09f1.ts.net
 
 ---
 
-## 🛠️ Built With
+## What This Is
 
-- **Backend & Web**: ASP.NET Core MVC (.NET 10)
-- **Database**: 
-  - **Supabase PostgreSQL** in production (data stays safe forever)
-  - **SQLite** fallback for easy local offline development
-- **Cloud Storage**: **Supabase Storage** for product and founder pictures
-- **Styling**: Bootstrap 5 + FontAwesome icons + Custom CSS
-- **Deployment**: Docker, Docker Compose, and GitHub Actions
+A small ecommerce site for a real business, premium, pasture-raised artisanal pork products. It allows customers to browse cuts of pork, add items to their cart, select a delivery date, and place orders. It also includes an admin dashboard for managing inventory, tracking orders, and updating store information.
 
 ---
 
-## 🚀 How to Run Locally (Developer Mode)
+## Stack
 
-### Requirements
-- [.NET 10 SDK](https://dotnet.microsoft.com/download) installed on your computer.
-
-### Steps
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/dubem4521-dot/TJPork.git
-   cd TJPork
-   ```
-
-2. **Run the project**:
-   ```bash
-   dotnet run --project src/TJPork.Web
-   ```
-
-3. Open your browser and navigate to:
-   ```
-   http://localhost:5000
-   ```
-   *(On first run, it automatically creates a local SQLite database and fills it with sample products and an admin account.)*
+| Layer | Technology | Where it runs |
+|:------|:-----------|:--------------|
+| Web framework | ASP.NET Core (.NET 10) | Docker container |
+| Database | PostgreSQL via Supabase | Cloud, managed |
+| Image storage | Supabase Storage | Cloud, managed |
+| Caching | Redis (dev only) | Docker container |
+| Email (dev) | MailHog | Docker container |
+| Hosting | HP t520 thin client | Home, behind Tailscale Funnel |
+| CI/CD | GitHub Actions | Builds image, pushes to Docker Hub |
+| Reverse proxy | Tailscale Funnel | Provides the public HTTPS URL |
 
 ---
 
-## 🐳 How to Run with Docker (DietPi / Linux Server)
+## Repo Layout
 
-### 1. Create your project folder
+```
+TJPork/
+    .github/
+        workflows/
+            build-and-push.yml
+            deploy.yml
+    src/
+        TJPork.Core/
+        TJPork.Infrastructure/
+        TJPork.Web/
+    tests/
+        TJPork.Tests/
+    .dockerignore
+    .editorconfig
+    .env.example
+    .gitignore
+    docker-compose.yml
+    docker-compose.prod.yml
+    Dockerfile
+    README.md
+    TJPork.sln
+```
+
+---
+
+## How To Run It Locally
+
+You need Docker Desktop (or Docker Engine on Linux) and a Supabase account.
+
+### 1. Clone and configure
+
 ```bash
-mkdir -p /srv/share/docker/tjpork-app
-cd /srv/share/docker/tjpork-app
+git clone https://github.com/dubem4521-dot/TJPork.git
+cd TJPork
+cp .env.example .env
 ```
 
-### 2. Create your `.env` file
-Create a file named `.env` and fill in your Supabase credentials:
+Edit `.env` and fill in your Supabase credentials:
 
-```env
-# Supabase PostgreSQL Connection Pooler (Port 5432 or 6543)
-DATABASE_URL=postgresql://postgres.YOUR_PROJECT_REF:YOUR_PASSWORD@aws-0-eu-central-1.pooler.supabase.com:5432/postgres
-
-# Supabase Storage for Photos
-SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-SUPABASE_KEY=YOUR_SUPABASE_SERVICE_ROLE_KEY
-SUPABASE_BUCKET=tjpork-images
+```
+DATABASE_URL=Host=aws-0-eu-central-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.<project>;Password=<your-password>
+SUPABASE_URL=https://<your-project>.supabase.co
+SUPABASE_KEY=<your-service-role-key>
 ```
 
-### 3. Create your `docker-compose.yml`
-```yaml
-services:
-  tjpork-web:
-    container_name: tjpork-webapp
-    image: rustytoothpickk/tjpork-app:latest
-    ports:
-      - "5000:8080"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
-      - DATABASE_URL=${DATABASE_URL}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_KEY=${SUPABASE_KEY}
-      - SUPABASE_BUCKET=${SUPABASE_BUCKET}
-    volumes:
-      - ./aspnet-keys:/root/.aspnet/DataProtection-Keys
-    restart: unless-stopped
-```
+**Note:** use the connection pooler URL, not the direct URL. The direct one is IPv6 only and fails inside Docker.
 
-### 4. Start the container
+### 2. Run with Docker Compose
+
 ```bash
-docker compose pull
 docker compose up -d
 ```
 
-Access the store at `http://<your-server-ip>:5000`.
+Open `http://localhost:5000` in your browser. The first time the app starts, it creates the database schema and seeds default products and an admin user.
 
----
+MailHog runs on `http://localhost:8025` for catching outgoing emails in development.
 
-## 🔑 Default Accounts (First Startup)
+### 3. Run without Docker (optional)
 
-When the application boots up for the first time, it automatically creates default test accounts:
-
-| Role | Email | Password |
-|---|---|---|
-| **Admin** | `tinashe@tjpork.com` | `Admin2026!#Pork` |
-| **Customer** | `max@tjpork.com` | `Customer2026!#Pork` |
-
-*(Be sure to change these passwords after logging in on a live store.)*
-
----
-
-## 🧪 Running Tests
-
-To verify that all features work properly, run the test suite:
+If you have the .NET 10 SDK installed:
 
 ```bash
-dotnet test TJPork.sln
+dotnet restore
+dotnet run --project src/TJPork.Web
 ```
-All tests should pass (24/24 passed).
+
+The app falls back to a local SQLite database if `DATABASE_URL` is not set.
+
+---
+
+## How It Deploys
+
+Every push to `main` triggers a GitHub Actions workflow that:
+
+1. Builds the Docker image.
+2. Tags it with both `latest` and the commit SHA.
+3. Pushes it to Docker Hub.
+4. Connects to the home server via Tailscale.
+5. SSHes in and pulls the new image.
+6. Restarts the container with `docker compose up -d`.
+
+The server runs the ASP.NET Core app behind Tailscale Funnel, which provides a public HTTPS URL without opening any router ports.
+
+---
+
+## Environment Variables
+
+| Variable | Purpose | Required |
+|:---------|:--------|:---------|
+| `DATABASE_URL` | PostgreSQL connection string (Supabase pooler) | Yes (prod) |
+| `SUPABASE_URL` | Supabase project URL | Yes (for images) |
+| `SUPABASE_KEY` | Supabase `service_role` key, for server-side uploads | Yes (for images) |
+| `ASPNETCORE_ENVIRONMENT` | `Development` or `Production` | Yes |
+| `ASPNETCORE_URLS` | URL and port the app listens on | Yes |
+| `ASPNETCORE_FORWARDEDHEADERS_ENABLED` | Trust proxy headers (needed behind Funnel) | Yes (prod) |
+| `ConnectionStrings__Redis` | Redis connection string | No (dev only) |
+| `EmailSettings__*` | SMTP settings for order emails | No (currently unused) |
+
+See `.env.example` for the full list.
+
+---
+
+## Testing
+
+```bash
+dotnet test
+```
+
+24 tests, covering core business logic and service layers.
+
+**Currently not run in CI.** Adding a `dotnet test` job before the build is on the roadmap.
+
+---
+
+
+
+## License
+
+Personal project. No license applied. Do not distribute.
+
+---
+
+## Author
+
+Built and maintained by Max. Contact via GitHub.

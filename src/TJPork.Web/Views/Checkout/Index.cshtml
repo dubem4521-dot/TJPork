@@ -95,50 +95,26 @@
                         <h2 style="font-size: 1.35rem; margin: 0;">Payment Method</h2>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
-                        <!-- Option A: Cash on delivery -->
-                        <label class="tjp-card" style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; box-shadow: var(--shadow-raised-sm); margin: 0;">
-                            <input type="radio" asp-for="PaymentMethod" value="CashOnDelivery" id="payCod" style="width: 20px; height: 20px; accent-color: var(--accent-orange);" checked />
+                    <input type="hidden" asp-for="PaymentMethod" value="CashOnDelivery" />
+
+                    <!-- Pay on Delivery Dedicated Card -->
+                    <div class="tjp-card" style="padding: 24px; border: 2px solid var(--accent-orange-light); background: #FFFDF9; border-radius: var(--radius-md); margin-bottom: 8px;">
+                        <div style="display: flex; align-items: flex-start; gap: 16px;">
+                            <div style="width: 52px; height: 52px; border-radius: var(--radius-full); background: var(--accent-green-light); color: var(--accent-green); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                                <i class="fa-solid fa-truck-ramp-box"></i>
+                            </div>
                             <div style="flex: 1;">
-                                <div style="font-weight: 700; font-size: 1rem; color: var(--text-primary);"><i class="fa-solid fa-money-bill-wave" style="color: var(--accent-green); margin-right: 8px;"></i> Pay Upon Delivery (Cash / Card Terminal)</div>
-                                <div style="font-size: 0.84rem; color: var(--text-secondary);">Pay when your cold-chain pork package is delivered to your door.</div>
-                            </div>
-                        </label>
-
-                        <!-- Option B: Pay Now via Card -->
-                        <label class="tjp-card" style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; box-shadow: var(--shadow-raised-sm); margin: 0;">
-                            <input type="radio" asp-for="PaymentMethod" value="CreditCard" id="payCard" style="width: 20px; height: 20px; accent-color: var(--accent-orange);" />
-                            <div style="flex: 1;">
-                                <div style="font-weight: 700; font-size: 1rem; color: var(--text-primary);"><i class="fa-solid fa-credit-card" style="color: #3498DB; margin-right: 8px;"></i> Pay Now (Credit / Debit Card)</div>
-                                <div style="font-size: 0.84rem; color: var(--text-secondary);">Instant secure online processing (Visa, MasterCard, PayFast).</div>
-                            </div>
-                        </label>
-                    </div>
-
-                    <!-- Card Fields Container -->
-                    <div id="cardFieldsSection" style="display: none; background: var(--bg-surface); padding: 24px; border-radius: var(--radius-md); box-shadow: var(--shadow-inset-sm);">
-                        <div class="tjp-input-group">
-                            <label class="tjp-label">Name on Card</label>
-                            <input asp-for="CardHolderName" class="tjp-input" placeholder="e.g. Sipho Ndlovu" />
-                        </div>
-
-                        <div class="tjp-input-group">
-                            <label class="tjp-label">Card Number</label>
-                            <input asp-for="CardNumber" class="tjp-input" placeholder="4532 &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 8921" />
-                            <span asp-validation-for="CardNumber" style="color: var(--danger); font-size: 0.8rem;"></span>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                            <div class="tjp-input-group">
-                                <label class="tjp-label">Expiration Date</label>
-                                <input asp-for="CardExpiry" class="tjp-input" placeholder="MM/YY" />
-                                <span asp-validation-for="CardExpiry" style="color: var(--danger); font-size: 0.8rem;"></span>
-                            </div>
-
-                            <div class="tjp-input-group">
-                                <label class="tjp-label">Security CVC</label>
-                                <input asp-for="CardCvc" class="tjp-input" placeholder="CVC" maxlength="4" />
-                                <span asp-validation-for="CardCvc" style="color: var(--danger); font-size: 0.8rem;"></span>
+                                <div style="font-weight: 800; font-size: 1.15rem; color: var(--text-primary); margin-bottom: 6px;">
+                                    Pay Upon Delivery (Cash or Mobile POS Card Terminal)
+                                </div>
+                                <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 14px;">
+                                    For maximum security and freshness assurance, we do not charge your card online. Simply inspect your chilled package and pay our delivery driver upon arrival.
+                                </p>
+                                <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.84rem; color: var(--accent-green); font-weight: 700;">
+                                    <span><i class="fa-solid fa-circle-check"></i> Zero Upfront Online Payments</span>
+                                    <span><i class="fa-solid fa-circle-check"></i> Portable Tap &amp; Chip Terminal</span>
+                                    <span><i class="fa-solid fa-circle-check"></i> Exact Cash Accepted</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -206,25 +182,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const payCardRadio = document.querySelector('#payCard');
-            const payCodRadio = document.querySelector('#payCod');
-            const cardFields = document.querySelector('#cardFieldsSection');
-
-            function toggleCardFields() {
-                if (payCardRadio && payCardRadio.checked) {
-                    cardFields.style.display = 'block';
-                } else {
-                    cardFields.style.display = 'none';
-                }
-            }
-
-            if (payCardRadio && payCodRadio && cardFields) {
-                payCardRadio.addEventListener('change', toggleCardFields);
-                payCodRadio.addEventListener('change', toggleCardFields);
-                toggleCardFields();
-            }
-        });
-    </script>
 }

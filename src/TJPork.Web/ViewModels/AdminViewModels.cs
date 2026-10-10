@@ -153,7 +153,7 @@ namespace TJPork.Web.ViewModels
         [Required]
         [EmailAddress]
         [Display(Name = "Customer Support Email")]
-        public string ContactEmail { get; set; } = "orders@tjpork.com";
+        public string ContactEmail { get; set; } = "orderstjpork@gmail.com";
 
         [Required]
         [Phone]

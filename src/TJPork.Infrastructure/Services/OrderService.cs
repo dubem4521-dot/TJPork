@@ -54,14 +54,8 @@ namespace TJPork.Infrastructure.Services
             order.DiscountAmount = cart.DiscountAmount;
             order.TotalAmount = cart.Total;
 
-            if (order.PaymentMethod == PaymentMethod.CreditCard)
-            {
-                order.PaymentStatus = PaymentStatus.Paid; // Instant card payment
-            }
-            else
-            {
-                order.PaymentStatus = PaymentStatus.Pending; // Cash / Terminal on delivery
-            }
+            order.PaymentMethod = PaymentMethod.CashOnDelivery;
+            order.PaymentStatus = PaymentStatus.Pending; // Collect on delivery via card terminal or cash
 
             order.DeliveryStatus = OrderStatus.Processing;
 

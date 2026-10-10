@@ -1,30 +1,159 @@
 @model TJPork.Web.ViewModels.AdminAnalyticsViewModel
 @{
     Layout = "_AdminLayout";
-    ViewData["Title"] = "Analytics & Revenue Reports";
+    ViewData["Title"] = "Analytics & Trip Meter Dashboard";
 }
 
-<!-- Export & Date Range Header -->
-<div class="tjp-card" style="padding: 20px 24px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
-    <form method="get" asp-action="Analytics" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-        <label style="font-size: 0.88rem; font-weight: 600;">Date Range:</label>
-        <input type="date" name="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" class="tjp-input" style="width: auto; padding: 6px 12px; font-size: 0.88rem;" />
-        <span style="color: var(--text-muted);">&ndash;</span>
-        <input type="date" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" class="tjp-input" style="width: auto; padding: 6px 12px; font-size: 0.88rem;" />
-        <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm"><i class="fa-solid fa-arrows-rotate"></i> Update</button>
-    </form>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div style="background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; padding: 14px 20px; border-radius: var(--radius-md); font-size: 0.95rem; margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+        <i class="fa-solid fa-circle-check" style="color: #10B981; font-size: 1.2rem;"></i>
+        <span>@TempData["SuccessMessage"]</span>
+    </div>
+}
 
-    <a asp-action="ExportRevenueCsv" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")" asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")" class="tjp-btn tjp-btn-primary">
-        <i class="fa-solid fa-file-csv"></i> Download CSV Report
-    </a>
+<!-- ========================================================================
+     CAR MILEAGE DASHBOARD CLUSTER (Trip Meter & Lifetime Odometer)
+     ======================================================================== -->
+<div class="tjp-card" style="padding: 28px; margin-bottom: 32px; background: linear-gradient(145deg, #1E293B, #0F172A); color: #F8FAFC; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.25);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: var(--radius-md); background: rgba(224, 86, 36, 0.2); color: var(--accent-orange); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; border: 1px solid rgba(224, 86, 36, 0.4);">
+                <i class="fa-solid fa-gauge-high"></i>
+            </div>
+            <div>
+                <h2 style="font-size: 1.35rem; margin: 0; color: #FFFFFF; letter-spacing: -0.02em;">Executive Car Mileage Cluster</h2>
+                <span style="font-size: 0.82rem; color: #94A3B8;">Trip Meter (Tracking Interval) &bull; Lifetime Odometer (Permanent Ledger)</span>
+            </div>
+        </div>
+
+        <!-- Controls: Reset Trip Meter Button & Revert Option -->
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="tjp-btn tjp-btn-primary" onclick="openTripResetModal()" style="box-shadow: 0 4px 14px rgba(224, 86, 36, 0.4); font-size: 0.9rem;">
+                <i class="fa-solid fa-rotate-right"></i> Reset Trip Meter
+            </button>
+
+            @if (Model.Summary.HasTripReset)
+            {
+                <form asp-action="ClearTripBaseline" method="post" style="display: inline;" onsubmit="return confirm('Revert trip meter baseline to inception? All-time metrics will show as trip.');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="tjp-btn tjp-btn-neu" style="background: rgba(255,255,255,0.08); color: #CBD5E1; border: 1px solid rgba(255,255,255,0.15); font-size: 0.85rem;" title="Remove trip baseline and sync with lifetime">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Revert to All-Time
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <!-- Dual Instrument Cluster Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+        <!-- Left Gauge: TRIP METER (Trip A) -->
+        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(224, 86, 36, 0.3); border-radius: 12px; padding: 22px; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-orange);">
+                    <i class="fa-solid fa-stopwatch" style="margin-right: 5px;"></i> Trip Meter (Since Reset)
+                </span>
+                @if (Model.Summary.HasTripReset)
+                {
+                    <span style="background: rgba(34, 197, 94, 0.2); color: #4ADE80; font-size: 0.75rem; padding: 3px 10px; border-radius: 999px; font-weight: 700; border: 1px solid rgba(74, 222, 128, 0.4);">
+                        ● Active (@Model.Summary.TripDaysActive d)
+                    </span>
+                }
+                else
+                {
+                    <span style="background: rgba(148, 163, 184, 0.2); color: #94A3B8; font-size: 0.75rem; padding: 3px 10px; border-radius: 999px;">
+                        All-Time Inception
+                    </span>
+                }
+            </div>
+
+            <div class="mono" style="font-size: 2.2rem; font-weight: 800; color: #FFFFFF; margin-bottom: 10px;">
+                R@(Model.Summary.TripRevenue.ToString("F2"))
+            </div>
+
+            <div style="display: flex; gap: 18px; font-size: 0.85rem; color: #CBD5E1; margin-bottom: 14px; flex-wrap: wrap;">
+                <div><span style="color: #94A3B8;">Orders:</span> <strong class="mono" style="color: #FFFFFF;">@Model.Summary.TripOrdersCount</strong></div>
+                <div><span style="color: #94A3B8;">AOV:</span> <strong class="mono" style="color: #FFFFFF;">R@(Model.Summary.TripAverageOrderValue.ToString("F2"))</strong></div>
+                <div><span style="color: #94A3B8;">Cuts Sold:</span> <strong class="mono" style="color: #FFFFFF;">@Model.Summary.TripItemsSold</strong></div>
+            </div>
+
+            <div style="font-size: 0.78rem; color: #94A3B8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+                @if (Model.Summary.HasTripReset)
+                {
+                    <span>Baseline: <strong>@Model.Summary.TripResetDate?.ToString("MMM dd, yyyy HH:mm") UTC</strong> by @Model.Summary.TripResetBy &bull; Note: <em>@(Model.Summary.TripResetNote ?? "None")</em></span>
+                }
+                else
+                {
+                    <span>Trip baseline currently tracks all orders since store launch. Click "Reset Trip Meter" above to start a fresh cycle.</span>
+                }
+            </div>
+        </div>
+
+        <!-- Right Gauge: LIFETIME ODOMETER (Total Mileage / Permanent Records) -->
+        <div style="background: rgba(255,255,255,0.04); border: 1px solid rgba(52, 152, 219, 0.3); border-radius: 12px; padding: 22px; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <span style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #38BDF8;">
+                    <i class="fa-solid fa-road" style="margin-right: 5px;"></i> Lifetime Odometer (Permanent Ledger)
+                </span>
+                <span style="background: rgba(56, 189, 248, 0.2); color: #38BDF8; font-size: 0.75rem; padding: 3px 10px; border-radius: 999px; font-weight: 700; border: 1px solid rgba(56, 189, 248, 0.4);">
+                    <i class="fa-solid fa-lock"></i> Never Erased
+                </span>
+            </div>
+
+            <div class="mono" style="font-size: 2.2rem; font-weight: 800; color: #38BDF8; margin-bottom: 10px;">
+                R@(Model.Summary.TotalRevenue.ToString("F2"))
+            </div>
+
+            <div style="display: flex; gap: 18px; font-size: 0.85rem; color: #CBD5E1; margin-bottom: 14px; flex-wrap: wrap;">
+                <div><span style="color: #94A3B8;">All-Time Orders:</span> <strong class="mono" style="color: #FFFFFF;">@Model.Summary.TotalOrders</strong></div>
+                <div><span style="color: #94A3B8;">Lifetime AOV:</span> <strong class="mono" style="color: #FFFFFF;">R@(Model.Summary.AverageOrderValue.ToString("F2"))</strong></div>
+                <div><span style="color: #94A3B8;">Total Cuts Fulfilled:</span> <strong class="mono" style="color: #FFFFFF;">@Model.Summary.LifetimeItemsSold</strong></div>
+            </div>
+
+            <div style="font-size: 0.78rem; color: #94A3B8; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px;">
+                <span>Underlying database orders and financial audits are permanent. Resetting the trip counter never deletes or alters historical data.</span>
+            </div>
+        </div>
+    </div>
 </div>
 
-<!-- Financial Summary KPI Row -->
+<!-- ========================================================================
+     VIEW MODE TOGGLE & DATE RANGE EXPORT HEADER
+     ======================================================================== -->
+<div class="tjp-card" style="padding: 18px 24px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <!-- View Mode Switcher -->
+    <div style="display: flex; gap: 8px; background: var(--bg-surface); padding: 4px; border-radius: var(--radius-md);">
+        <button type="button" class="tjp-btn tjp-btn-sm" id="viewModeTripBtn" onclick="switchViewMode('trip')" style="font-weight: 700; background: var(--accent-orange); color: #FFF;">
+            <i class="fa-solid fa-stopwatch"></i> Trip Meter View
+        </button>
+        <button type="button" class="tjp-btn tjp-btn-sm tjp-btn-neu" id="viewModeLifetimeBtn" onclick="switchViewMode('lifetime')" style="font-weight: 600; color: var(--text-secondary);">
+            <i class="fa-solid fa-road"></i> Lifetime Odometer View
+        </button>
+    </div>
+
+    <!-- Date Range & CSV Download Form -->
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <form method="get" asp-action="Analytics" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input type="date" name="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" class="tjp-input" style="width: auto; padding: 6px 12px; font-size: 0.88rem;" />
+            <span style="color: var(--text-muted);">&ndash;</span>
+            <input type="date" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" class="tjp-input" style="width: auto; padding: 6px 12px; font-size: 0.88rem;" />
+            <button type="submit" class="tjp-btn tjp-btn-neu tjp-btn-sm"><i class="fa-solid fa-arrows-rotate"></i> Filter</button>
+        </form>
+
+        <a asp-action="ExportRevenueCsv" asp-route-startDate="@Model.StartDate.ToString("yyyy-MM-dd")" asp-route-endDate="@Model.EndDate.ToString("yyyy-MM-dd")" class="tjp-btn tjp-btn-primary tjp-btn-sm">
+            <i class="fa-solid fa-file-csv"></i> Export CSV
+        </a>
+    </div>
+</div>
+
+<!-- ========================================================================
+     KPI STATS CARDS (Switches between Trip and Lifetime)
+     ======================================================================== -->
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px;">
     <div class="tjp-metric-card">
         <div>
-            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Total Revenue</div>
-            <div class="mono" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-green);">R@(Model.Summary.TotalRevenue.ToString("F2"))</div>
+            <div id="kpiRevenueLabel" style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Trip Revenue</div>
+            <div id="kpiRevenueVal" class="mono" style="font-size: 1.8rem; font-weight: 800; color: var(--accent-green);">R@(Model.Summary.TripRevenue.ToString("F2"))</div>
         </div>
         <div class="tjp-metric-icon" style="background: var(--accent-green-light); color: var(--accent-green);">
             <i class="fa-solid fa-sack-dollar"></i>
@@ -33,8 +162,8 @@
 
     <div class="tjp-metric-card">
         <div>
-            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Total Orders Fulfilled</div>
-            <div class="mono" style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary);">@Model.Summary.TotalOrders</div>
+            <div id="kpiOrdersLabel" style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Trip Orders Fulfilled</div>
+            <div id="kpiOrdersVal" class="mono" style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary);">@Model.Summary.TripOrdersCount</div>
         </div>
         <div class="tjp-metric-icon" style="background: var(--accent-orange-light); color: var(--accent-orange);">
             <i class="fa-solid fa-truck-ramp-box"></i>
@@ -43,8 +172,8 @@
 
     <div class="tjp-metric-card">
         <div>
-            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Average Order Value</div>
-            <div class="mono" style="font-size: 1.8rem; font-weight: 800; color: #3498DB;">R@(Model.Summary.AverageOrderValue.ToString("F2"))</div>
+            <div id="kpiAovLabel" style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Trip Avg Order Value</div>
+            <div id="kpiAovVal" class="mono" style="font-size: 1.8rem; font-weight: 800; color: #3498DB;">R@(Model.Summary.TripAverageOrderValue.ToString("F2"))</div>
         </div>
         <div class="tjp-metric-icon" style="background: #EBF5FB; color: #3498DB;">
             <i class="fa-solid fa-chart-pie"></i>
@@ -53,33 +182,80 @@
 
     <div class="tjp-metric-card">
         <div>
-            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Repeat Customer Rate</div>
-            <div class="mono" style="font-size: 1.8rem; font-weight: 800; color: #9B59B6;">84.2%</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted); font-weight: 600;">Registered Customers</div>
+            <div class="mono" style="font-size: 1.8rem; font-weight: 800; color: #9B59B6;">@Model.Summary.TotalCustomers</div>
         </div>
         <div class="tjp-metric-icon" style="background: #F4ECF7; color: #9B59B6;">
-            <i class="fa-solid fa-heart-circle-check"></i>
+            <i class="fa-solid fa-users"></i>
         </div>
     </div>
 </div>
 
-<!-- Detailed Revenue Chart -->
+<!-- ========================================================================
+     DETAILED REVENUE TRAJECTORY CHART
+     ======================================================================== -->
 <div class="tjp-card" style="padding: 28px; margin-bottom: 32px;">
-    <h3 style="font-size: 1.25rem; margin-bottom: 20px;"><i class="fa-solid fa-chart-area" style="color: var(--accent-orange); margin-right: 8px;"></i> Revenue Trajectory (30-Day Period)</h3>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 id="chartHeaderTitle" style="font-size: 1.25rem; margin: 0;">
+            <i class="fa-solid fa-chart-area" style="color: var(--accent-orange); margin-right: 8px;"></i> Revenue Trajectory (Trip Meter Period)
+        </h3>
+        <span id="chartModeBadge" class="tjp-chip" style="background: var(--bg-surface); font-size: 0.78rem;">
+            ● Showing Trip Days
+        </span>
+    </div>
     <div style="height: 320px; position: relative;">
         <canvas id="detailedSalesCanvas"></canvas>
     </div>
 </div>
 
-<!-- Top Products and Category Distribution -->
+<!-- ========================================================================
+     TOP CUTS & CATEGORY DISTRIBUTION
+     ======================================================================== -->
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
     <!-- Best Sellers -->
     <div class="tjp-card" style="padding: 24px;">
-        <h3 style="font-size: 1.15rem; margin-bottom: 16px;"><i class="fa-solid fa-award" style="color: #F1C40F; margin-right: 8px;"></i> Best-Selling Cuts</h3>
-        <div style="overflow-x: auto;">
+        <h3 id="topProductsTitle" style="font-size: 1.15rem; margin-bottom: 16px;">
+            <i class="fa-solid fa-award" style="color: #F1C40F; margin-right: 8px;"></i> Best-Selling Cuts (Trip Interval)
+        </h3>
+
+        <!-- Trip Products Table -->
+        <div id="tripProductsTable" style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                 <thead>
                     <tr style="border-bottom: 1px solid #EEF2F6; color: var(--text-secondary); text-align: left; font-size: 0.82rem;">
-                        <th style="padding: 8px 0;">Product</th>
+                        <th style="padding: 8px 0;">Product Cut</th>
+                        <th style="padding: 8px 0; text-align: center;">Sold</th>
+                        <th style="padding: 8px 0; text-align: right;">Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Summary.TripTopSellingProducts.Any())
+                    {
+                        @foreach (var p in Model.Summary.TripTopSellingProducts)
+                        {
+                            <tr style="border-bottom: 1px solid #F1F5F9;">
+                                <td style="padding: 10px 0; font-weight: 600;">@p.ProductName</td>
+                                <td style="padding: 10px 0; text-align: center;" class="mono">@p.UnitsSold</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 700; color: var(--accent-green);" class="mono">R@(p.TotalRevenue.ToString("F2"))</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" style="padding: 18px 0; text-align: center; color: var(--text-muted);">No sales recorded in this trip interval yet.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Lifetime Products Table -->
+        <div id="lifetimeProductsTable" style="overflow-x: auto; display: none;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #EEF2F6; color: var(--text-secondary); text-align: left; font-size: 0.82rem;">
+                        <th style="padding: 8px 0;">Product Cut</th>
                         <th style="padding: 8px 0; text-align: center;">Sold</th>
                         <th style="padding: 8px 0; text-align: right;">Revenue</th>
                     </tr>
@@ -100,8 +276,44 @@
 
     <!-- Category Revenue Share -->
     <div class="tjp-card" style="padding: 24px;">
-        <h3 style="font-size: 1.15rem; margin-bottom: 16px;"><i class="fa-solid fa-layer-group" style="color: var(--accent-orange); margin-right: 8px;"></i> Revenue by Cut Category</h3>
-        <div style="overflow-x: auto;">
+        <h3 id="categoryTitle" style="font-size: 1.15rem; margin-bottom: 16px;">
+            <i class="fa-solid fa-layer-group" style="color: var(--accent-orange); margin-right: 8px;"></i> Category Share (Trip Interval)
+        </h3>
+
+        <!-- Trip Categories Table -->
+        <div id="tripCategoriesTable" style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #EEF2F6; color: var(--text-secondary); text-align: left; font-size: 0.82rem;">
+                        <th style="padding: 8px 0;">Category</th>
+                        <th style="padding: 8px 0; text-align: center;">Items Sold</th>
+                        <th style="padding: 8px 0; text-align: right;">Total Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Summary.TripCategoryBreakdown.Any())
+                    {
+                        @foreach (var cat in Model.Summary.TripCategoryBreakdown)
+                        {
+                            <tr style="border-bottom: 1px solid #F1F5F9;">
+                                <td style="padding: 10px 0; font-weight: 600;">@cat.CategoryName</td>
+                                <td style="padding: 10px 0; text-align: center;" class="mono">@cat.ItemsSold</td>
+                                <td style="padding: 10px 0; text-align: right; font-weight: 700; color: var(--accent-green);" class="mono">R@(cat.Revenue.ToString("F2"))</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" style="padding: 18px 0; text-align: center; color: var(--text-muted);">No sales in this trip interval yet.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Lifetime Categories Table -->
+        <div id="lifetimeCategoriesTable" style="overflow-x: auto; display: none;">
             <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                 <thead>
                     <tr style="border-bottom: 1px solid #EEF2F6; color: var(--text-secondary); text-align: left; font-size: 0.82rem;">
@@ -125,12 +337,207 @@
     </div>
 </div>
 
+<!-- ========================================================================
+     MODAL: RESET TRIP METER WITH CONFIRMATION
+     ======================================================================== -->
+<div id="tripResetModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.7); z-index: 9999; backdrop-filter: blur(4px); align-items: center; justify-content: center;">
+    <div class="tjp-card" style="max-width: 540px; width: 90%; padding: 36px; border-radius: var(--radius-lg); box-shadow: 0 20px 40px rgba(0,0,0,0.3); background: #FFFFFF; animation: popIn 0.2s ease;">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
+            <div style="width: 52px; height: 52px; border-radius: var(--radius-full); background: #FFF7ED; color: var(--accent-orange); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; border: 2px solid #FFEDD5; flex-shrink: 0;">
+                <i class="fa-solid fa-gauge-high"></i>
+            </div>
+            <div>
+                <h3 style="font-size: 1.4rem; margin: 0; color: var(--text-primary);">Reset Trip Meter Baseline</h3>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">Vehicle Mileage Computer Analogy</span>
+            </div>
+        </div>
+
+        <!-- Metaphor Explanation Banner -->
+        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: var(--radius-md); padding: 18px; margin-bottom: 22px; font-size: 0.88rem; line-height: 1.6; color: #334155;">
+            <div style="font-weight: 700; color: #0F172A; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-shield-check" style="color: var(--accent-green);"></i> All Data is Completely Preserved
+            </div>
+            Just like pressing <strong>"Reset Trip"</strong> on your car's steering wheel:
+            <ul style="margin: 8px 0 0; padding-left: 18px; color: #475569;">
+                <li>Your <strong>Lifetime Odometer</strong> will NEVER be deleted or affected. Past revenues, fulfilled orders, and customer history remain 100% intact.</li>
+                <li>Your <strong>Trip Counter</strong> will start calculating revenue and orders fresh from right now (<strong>@DateTime.UtcNow.ToString("MMM dd, yyyy HH:mm") UTC</strong>).</li>
+                <li>Ideal for timing a new weekend sale, monthly accounting period, or marketing campaign!</li>
+            </ul>
+        </div>
+
+        <form asp-action="ResetTripAnalytics" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="tjp-input-group" style="margin-bottom: 24px;">
+                <label class="tjp-label">Trip Tag / Campaign Label (Optional)</label>
+                <input type="text" name="note" class="tjp-input" placeholder="e.g. October Smokehouse Campaign, Weekend Braai Launch" maxlength="100" />
+                <span style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; display: block;">Helps you and other admins recognize when and why this tracking window was started.</span>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="tjp-btn tjp-btn-neu" onclick="closeTripResetModal()">Cancel</button>
+                <button type="submit" class="tjp-btn tjp-btn-primary" style="font-weight: 700;">
+                    <i class="fa-solid fa-gauge-high"></i> Confirm &amp; Reset Baseline
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section Scripts {
     <script>
+        const tripLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.TripSalesTrajectory.Select(s => s.Date)));
+        const tripData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.TripSalesTrajectory.Select(s => s.Revenue)));
+        
+        const lifetimeLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.Last30DaysSales.Select(s => s.Date)));
+        const lifetimeData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.Last30DaysSales.Select(s => s.Revenue)));
+
+        let salesChartInstance = null;
+
+        function renderChart(labels, data) {
+            const ctx = document.getElementById('detailedSalesCanvas');
+            if (!ctx) return;
+
+            if (salesChartInstance) {
+                salesChartInstance.destroy();
+            }
+
+            salesChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue (R)',
+                        data: data,
+                        borderColor: '#E05624',
+                        backgroundColor: 'rgba(224, 86, 36, 0.12)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.35,
+                        pointBackgroundColor: '#FFFFFF',
+                        pointBorderColor: '#E05624',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return ' R' + context.parsed.y.toFixed(2);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (val) {
+                                    return 'R' + val;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function switchViewMode(mode) {
+            const tripBtn = document.getElementById('viewModeTripBtn');
+            const lifetimeBtn = document.getElementById('viewModeLifetimeBtn');
+
+            const kpiRevLabel = document.getElementById('kpiRevenueLabel');
+            const kpiRevVal = document.getElementById('kpiRevenueVal');
+            const kpiOrdLabel = document.getElementById('kpiOrdersLabel');
+            const kpiOrdVal = document.getElementById('kpiOrdersVal');
+            const kpiAovLabel = document.getElementById('kpiAovLabel');
+            const kpiAovVal = document.getElementById('kpiAovVal');
+
+            const chartTitle = document.getElementById('chartHeaderTitle');
+            const chartBadge = document.getElementById('chartModeBadge');
+
+            const tripProd = document.getElementById('tripProductsTable');
+            const lifeProd = document.getElementById('lifetimeProductsTable');
+            const tripCat = document.getElementById('tripCategoriesTable');
+            const lifeCat = document.getElementById('lifetimeCategoriesTable');
+            const topProductsTitle = document.getElementById('topProductsTitle');
+            const categoryTitle = document.getElementById('categoryTitle');
+
+            if (mode === 'trip') {
+                tripBtn.style.background = 'var(--accent-orange)';
+                tripBtn.style.color = '#FFF';
+                lifetimeBtn.style.background = 'transparent';
+                lifetimeBtn.style.color = 'var(--text-secondary)';
+
+                kpiRevLabel.innerText = 'Trip Revenue';
+                kpiRevVal.innerText = 'R@Model.Summary.TripRevenue.ToString("F2")';
+                kpiOrdLabel.innerText = 'Trip Orders Fulfilled';
+                kpiOrdVal.innerText = '@Model.Summary.TripOrdersCount';
+                kpiAovLabel.innerText = 'Trip Avg Order Value';
+                kpiAovVal.innerText = 'R@Model.Summary.TripAverageOrderValue.ToString("F2")';
+
+                chartTitle.innerHTML = '<i class="fa-solid fa-chart-area" style="color: var(--accent-orange); margin-right: 8px;"></i> Revenue Trajectory (Trip Meter Period)';
+                chartBadge.innerText = '● Showing Trip Days';
+
+                tripProd.style.display = 'block';
+                lifeProd.style.display = 'none';
+                tripCat.style.display = 'block';
+                lifeCat.style.display = 'none';
+
+                topProductsTitle.innerHTML = '<i class="fa-solid fa-award" style="color: #F1C40F; margin-right: 8px;"></i> Best-Selling Cuts (Trip Interval)';
+                categoryTitle.innerHTML = '<i class="fa-solid fa-layer-group" style="color: var(--accent-orange); margin-right: 8px;"></i> Category Share (Trip Interval)';
+
+                renderChart(tripLabels, tripData);
+            } else {
+                lifetimeBtn.style.background = 'var(--accent-orange)';
+                lifetimeBtn.style.color = '#FFF';
+                tripBtn.style.background = 'transparent';
+                tripBtn.style.color = 'var(--text-secondary)';
+
+                kpiRevLabel.innerText = 'Lifetime Revenue';
+                kpiRevVal.innerText = 'R@Model.Summary.TotalRevenue.ToString("F2")';
+                kpiOrdLabel.innerText = 'Lifetime Orders Fulfilled';
+                kpiOrdVal.innerText = '@Model.Summary.TotalOrders';
+                kpiAovLabel.innerText = 'Lifetime Avg Order Value';
+                kpiAovVal.innerText = 'R@Model.Summary.AverageOrderValue.ToString("F2")';
+
+                chartTitle.innerHTML = '<i class="fa-solid fa-chart-area" style="color: var(--accent-orange); margin-right: 8px;"></i> Revenue Trajectory (30-Day Period)';
+                chartBadge.innerText = '● Showing Last 30 Days';
+
+                tripProd.style.display = 'none';
+                lifeProd.style.display = 'block';
+                tripCat.style.display = 'none';
+                lifeCat.style.display = 'block';
+
+                topProductsTitle.innerHTML = '<i class="fa-solid fa-award" style="color: #F1C40F; margin-right: 8px;"></i> Best-Selling Cuts (All-Time)';
+                categoryTitle.innerHTML = '<i class="fa-solid fa-layer-group" style="color: var(--accent-orange); margin-right: 8px;"></i> Category Share (All-Time)';
+
+                renderChart(lifetimeLabels, lifetimeData);
+            }
+        }
+
+        function openTripResetModal() {
+            const modal = document.getElementById('tripResetModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeTripResetModal() {
+            const modal = document.getElementById('tripResetModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
-            const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.Last30DaysSales.Select(s => s.Date)));
-            const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Summary.Last30DaysSales.Select(s => s.Revenue)));
-            initSalesChart('detailedSalesCanvas', labels, data);
+            renderChart(tripLabels, tripData);
         });
     </script>
 }

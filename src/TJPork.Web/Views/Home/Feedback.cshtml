@@ -1,0 +1,112 @@
+@model TJPork.Web.ViewModels.FeedbackViewModel
+@{
+    ViewData["Title"] = "Customer Feedback & Inquiries - T&JPork";
+}
+
+<div class="container" style="margin-top: 110px; margin-bottom: 80px;">
+    <div style="text-align: center; margin-bottom: 36px;">
+        <span style="color: var(--accent-orange); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;">We Value Your Thoughts</span>
+        <h1 style="font-size: 2.3rem; margin-top: 4px;">Feedback &amp; Contact</h1>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 8px auto 0; font-size: 1rem;">
+            Whether you have questions about our smokehouse curing, delivery inquiries, or suggestions, Tinashe &amp; Jeffery read every submission directly.
+        </p>
+    </div>
+
+    <div style="max-width: 720px; margin: 0 auto;">
+        @if (ViewBag.Submitted == true)
+        {
+            <div class="tjp-card" style="padding: 44px 36px; text-align: center;">
+                <div style="width: 72px; height: 72px; border-radius: var(--radius-full); background: var(--accent-green-light); color: var(--accent-green); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 2rem;">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h2 style="font-size: 1.8rem; margin-bottom: 12px; color: var(--text-primary);">Feedback Received!</h2>
+                <p style="font-size: 1.05rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px;">
+                    Thank you, <strong>@Model.FullName</strong>. A confirmation has been sent to <strong>@Model.Email</strong>, and our founding team will review your message promptly.
+                </p>
+
+                <div style="display: flex; justify-content: center; gap: 14px; flex-wrap: wrap;">
+                    <a asp-controller="Home" asp-action="Index" class="tjp-btn tjp-btn-primary">
+                        <i class="fa-solid fa-house"></i> Return Home
+                    </a>
+                    <a asp-controller="Shop" asp-action="Index" class="tjp-btn tjp-btn-neu">
+                        <i class="fa-solid fa-drumstick-bite"></i> Explore Cuts
+                    </a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="tjp-card" style="padding: 36px;">
+                <form asp-action="Feedback" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="ModelOnly" style="color: var(--danger); font-size: 0.88rem; margin-bottom: 20px;"></div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+                        <div class="tjp-input-group">
+                            <label asp-for="FullName" class="tjp-label"></label>
+                            <input asp-for="FullName" class="tjp-input" placeholder="e.g. Max Smith" />
+                            <span asp-validation-for="FullName" style="color: var(--danger); font-size: 0.8rem;"></span>
+                        </div>
+
+                        <div class="tjp-input-group">
+                            <label asp-for="Email" class="tjp-label"></label>
+                            <input asp-for="Email" class="tjp-input" placeholder="e.g. max@example.co.za" />
+                            <span asp-validation-for="Email" style="color: var(--danger); font-size: 0.8rem;"></span>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+                        <div class="tjp-input-group">
+                            <label asp-for="PhoneNumber" class="tjp-label"></label>
+                            <input asp-for="PhoneNumber" class="tjp-input" placeholder="e.g. +27 (0)82 123 4567" />
+                            <span asp-validation-for="PhoneNumber" style="color: var(--danger); font-size: 0.8rem;"></span>
+                        </div>
+
+                        <div class="tjp-input-group">
+                            <label asp-for="Category" class="tjp-label"></label>
+                            <select asp-for="Category" class="tjp-select">
+                                <option value="General Feedback">General Feedback</option>
+                                <option value="Cut Quality & Taste">Cut Quality &amp; Taste</option>
+                                <option value="Delivery & Fulfillment">Delivery &amp; Fulfillment</option>
+                                <option value="Smokehouse & Recipe Inquiry">Smokehouse &amp; Recipe Inquiry</option>
+                                <option value="Catering & Bulk Wholesale">Catering &amp; Bulk Wholesale</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="tjp-input-group">
+                        <label asp-for="Rating" class="tjp-label"></label>
+                        <select asp-for="Rating" class="tjp-select">
+                            <option value="5">★★★★★ Exceptional (5/5)</option>
+                            <option value="4">★★★★☆ Very Good (4/5)</option>
+                            <option value="3">★★★☆☆ Good (3/5)</option>
+                            <option value="2">★★☆☆☆ Needs Improvement (2/5)</option>
+                            <option value="1">★☆☆☆☆ Poor (1/5)</option>
+                        </select>
+                    </div>
+
+                    <div class="tjp-input-group">
+                        <label asp-for="Subject" class="tjp-label"></label>
+                        <input asp-for="Subject" class="tjp-input" placeholder="e.g. Question about cold-smoked belly bacon" />
+                        <span asp-validation-for="Subject" style="color: var(--danger); font-size: 0.8rem;"></span>
+                    </div>
+
+                    <div class="tjp-input-group" style="margin-bottom: 24px;">
+                        <label asp-for="Message" class="tjp-label"></label>
+                        <textarea asp-for="Message" class="tjp-input" rows="5" placeholder="Share your experience, culinary questions, or suggestions..."></textarea>
+                        <span asp-validation-for="Message" style="color: var(--danger); font-size: 0.8rem;"></span>
+                    </div>
+
+                    <button type="submit" class="tjp-btn tjp-btn-primary tjp-btn-lg" style="width: 100%;">
+                        <i class="fa-solid fa-paper-plane"></i> Submit Feedback
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

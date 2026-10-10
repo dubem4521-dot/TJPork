@@ -519,7 +519,7 @@ namespace TJPork.Infrastructure.Seed
                 var settings = new List<StoreSetting>
                 {
                     new StoreSetting { Key = "StoreName", Value = "T&JPork Artisanal Meats", Description = "Public store name", Group = "General" },
-                    new StoreSetting { Key = "ContactEmail", Value = "orders@tjpork.com", Description = "Customer support email", Group = "General" },
+                    new StoreSetting { Key = "ContactEmail", Value = "orderstjpork@gmail.com", Description = "Customer support email", Group = "General" },
                     new StoreSetting { Key = "ContactPhone", Value = "+27 (0)21 835 7675", Description = "Customer support phone", Group = "General" },
                     new StoreSetting { Key = "StandardDeliveryFee", Value = "65.00", Description = "Standard flat delivery fee in ZAR", Group = "Delivery" },
                     new StoreSetting { Key = "FreeDeliveryThreshold", Value = "500.00", Description = "Cart value for free delivery in ZAR", Group = "Delivery" },

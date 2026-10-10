@@ -16,11 +16,16 @@ namespace TJPork.Web.Controllers
     {
         private readonly TJPorkDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly TJPork.Core.Interfaces.IEmailService _emailService;
 
-        public ReviewController(TJPorkDbContext db, UserManager<ApplicationUser> userManager)
+        public ReviewController(
+            TJPorkDbContext db, 
+            UserManager<ApplicationUser> userManager,
+            TJPork.Core.Interfaces.IEmailService emailService)
         {
             _db = db;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         [HttpPost]
@@ -89,6 +94,23 @@ namespace TJPork.Web.Controllers
             product.ReviewCount = reviews.Count;
             product.Rating = Math.Round(reviews.Average(r => r.Rating), 1);
             await _db.SaveChangesAsync();
+
+            // Send notification to store owners
+            try
+            {
+                await _emailService.SendFeedbackNotificationToAdminAsync(
+                    customerName,
+                    customerEmail ?? "Not provided",
+                    null,
+                    $"Product Review for {product.Name}: \"{model.Title}\"",
+                    model.Comment,
+                    $"Cut Review ({product.Name})",
+                    model.Rating);
+            }
+            catch
+            {
+                // Silently logged
+            }
 
             TempData["SuccessMessage"] = "Thank you! Your review has been published.";
             return Redirect(returnUrl ?? "/");

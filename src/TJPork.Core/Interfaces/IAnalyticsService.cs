@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using TJPork.Core.Models;
 
@@ -9,5 +8,7 @@ namespace TJPork.Core.Interfaces
     {
         Task<DashboardSummaryDto> GetDashboardSummaryAsync();
         Task<byte[]> GenerateRevenueReportCsvAsync(DateTime startDate, DateTime endDate);
+        Task ResetTripBaselineAsync(string adminName, string? note = null);
+        Task ClearTripBaselineAsync();
     }
 }

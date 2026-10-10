@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TJPork.Core.Interfaces;
+using TJPork.Infrastructure.Configuration;
 using TJPork.Infrastructure.Data;
 using TJPork.Infrastructure.Identity;
 using TJPork.Infrastructure.Seed;
@@ -14,7 +15,12 @@ using TJPork.Web.Services;
 // Opt out of Npgsql 6+ strict UTC DateTime validation to safely support HTML date inputs
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+// Automatically load .env file if present
+EnvLoader.Load();
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddEnvironmentVariables();
+
 
 // 1. Add Database Context (Supabase PostgreSQL in production / SQLite local fallback)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 

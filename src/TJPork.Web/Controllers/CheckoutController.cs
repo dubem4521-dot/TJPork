@@ -71,22 +71,7 @@ namespace TJPork.Web.Controllers
             }
 
             model.Cart = cart;
-
-            if (model.PaymentMethod == PaymentMethod.CreditCard)
-            {
-                if (string.IsNullOrWhiteSpace(model.CardNumber) || model.CardNumber.Replace(" ", "").Length < 15)
-                {
-                    ModelState.AddModelError("CardNumber", "Please enter a valid 16-digit card number.");
-                }
-                if (string.IsNullOrWhiteSpace(model.CardExpiry))
-                {
-                    ModelState.AddModelError("CardExpiry", "Please enter card expiration date (MM/YY).");
-                }
-                if (string.IsNullOrWhiteSpace(model.CardCvc) || model.CardCvc.Length < 3)
-                {
-                    ModelState.AddModelError("CardCvc", "Please enter 3 or 4-digit CVC code.");
-                }
-            }
+            model.PaymentMethod = PaymentMethod.CashOnDelivery;
 
             if (!ModelState.IsValid)
             {
@@ -112,7 +97,7 @@ namespace TJPork.Web.Controllers
                 DeliveryDate = DateTime.SpecifyKind(model.DeliveryDate, DateTimeKind.Utc),
                 DeliverySlot = model.DeliverySlot,
                 SpecialInstructions = model.SpecialInstructions,
-                PaymentMethod = model.PaymentMethod
+                PaymentMethod = PaymentMethod.CashOnDelivery
             };
 
             try

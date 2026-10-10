@@ -73,7 +73,7 @@ namespace TJPork.Tests
                 PostalCode = "8001",
                 DeliveryDate = DateTime.UtcNow.AddDays(2),
                 DeliverySlot = DeliverySlot.Morning,
-                PaymentMethod = PaymentMethod.CreditCard
+                PaymentMethod = PaymentMethod.CashOnDelivery
             };
 
             // Act
@@ -81,7 +81,7 @@ namespace TJPork.Tests
 
             // Assert
             Assert.NotNull(createdOrder);
-            Assert.Equal(PaymentStatus.Paid, createdOrder.PaymentStatus);
+            Assert.Equal(PaymentStatus.Pending, createdOrder.PaymentStatus);
             Assert.Equal(OrderStatus.Processing, createdOrder.DeliveryStatus);
             Assert.Equal(345.00m, createdOrder.Subtotal);
             Assert.Single(createdOrder.Items);

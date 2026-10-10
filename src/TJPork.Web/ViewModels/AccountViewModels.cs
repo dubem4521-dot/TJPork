@@ -107,4 +107,34 @@ namespace TJPork.Web.ViewModels
 
         public bool IsDefault { get; set; } = false;
     }
+
+    public class ForgotPasswordViewModel
+    {
+        [Required(ErrorMessage = "Please enter your email address")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
+        [Display(Name = "Account Email Address")]
+        public string Email { get; set; } = string.Empty;
+    }
+
+    public class ResetPasswordViewModel
+    {
+        [Required]
+        public string Token { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Please enter your email address")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
+        [Display(Name = "Account Email Address")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "New password is required")]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 8)]
+        [DataType(DataType.Password)]
+        [Display(Name = "New Password")]
+        public string Password { get; set; } = string.Empty;
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm New Password")]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
 }

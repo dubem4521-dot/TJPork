@@ -60,6 +60,7 @@
                 <li><a asp-controller="Home" asp-action="Index" class="tjp-nav-link">Home</a></li>
                 <li><a asp-controller="Shop" asp-action="Index" class="tjp-nav-link">Shop Cuts</a></li>
                 <li><a asp-controller="Home" asp-action="About" class="tjp-nav-link">About Founders</a></li>
+                <li><a asp-controller="Home" asp-action="Feedback" class="tjp-nav-link">Feedback &amp; Contact</a></li>
             </ul>
 
             <!-- Navigation Action Buttons (Bell, Cart, Profile/Auth) -->
@@ -151,6 +152,12 @@
                     <a asp-controller="Home" asp-action="About" class="tjp-mobile-nav-link">
                         <i class="fa-solid fa-users" style="color: var(--accent-orange); width: 22px;"></i>
                         <span>About Founders</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Home" asp-action="Feedback" class="tjp-mobile-nav-link">
+                        <i class="fa-solid fa-comment-dots" style="color: var(--accent-orange); width: 22px;"></i>
+                        <span>Feedback &amp; Contact</span>
                     </a>
                 </li>
                 @if (SignInManager.IsSignedIn(User))
@@ -313,7 +320,7 @@
                         <li><a asp-controller="Home" asp-action="About" style="color: #CBD5E1;"><i class="fa-solid fa-chevron-right" style="font-size: 0.75rem; color: var(--accent-orange); margin-right: 6px;"></i> Meet Tinashe &amp; Jeffery</a></li>
                         <li><span style="color: #94A3B8;"><i class="fa-solid fa-shield-halved" style="color: var(--accent-green); margin-right: 6px;"></i> Zero Hormones or Antibiotics</span></li>
                         <li><span style="color: #94A3B8;"><i class="fa-solid fa-truck" style="color: var(--accent-orange); margin-right: 6px;"></i> Temperature-Controlled Delivery</span></li>
-                        <li><span style="color: #94A3B8;"><i class="fa-solid fa-house-chimney" style="color: #3498DB; margin-right: 6px;"></i> Franschhoek, Stellenbosch &amp; KZN Partners</span></li>
+                        <li><span style="color: #94A3B8;"><i class="fa-solid fa-house-chimney" style="color: #3498DB; margin-right: 6px;"></i> Milnerton | Somerset West, Cape Town</span></li>
                     </ul>
                 </div>
 
@@ -321,10 +328,7 @@
                 <div>
                     <h4 style="color: #FFFFFF; font-size: 1.05rem; margin-bottom: 18px;">Join the Smokehouse Club</h4>
                     <p style="color: #94A3B8; font-size: 0.88rem; margin-bottom: 14px;">Receive exclusive small-batch curing announcements and seasonal recipes.</p>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="email" placeholder="Enter your email" style="padding: 10px 14px; border-radius: var(--radius-sm); border: none; font-size: 0.9rem; flex: 1; outline: none;" />
-                        <button type="button" class="tjp-btn tjp-btn-primary tjp-btn-sm">Subscribe</button>
-                    </div>
+                    
                 </div>
             </div>
 
@@ -334,6 +338,8 @@
                     <a asp-controller="Home" asp-action="Privacy" style="color: #94A3B8;">Privacy Policy</a>
                     <span style="color: #475569;">&bull;</span>
                     <a asp-controller="Home" asp-action="About" style="color: #94A3B8;">Values &amp; Standards</a>
+                    <span style="color: #475569;">&bull;</span>
+                    <a asp-controller="Home" asp-action="Feedback" style="color: #94A3B8;">Feedback &amp; Contact</a>
                 </div>
             </div>
         </div>

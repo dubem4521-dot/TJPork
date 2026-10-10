@@ -33,4 +33,36 @@ namespace TJPork.Web.ViewModels
         public string CustomerName { get; set; } = string.Empty;
         public string? CustomerEmail { get; set; }
     }
+
+    public class FeedbackViewModel
+    {
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Please enter your name")]
+        [System.ComponentModel.DataAnnotations.Display(Name = "Your Name")]
+        public string FullName { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Please enter your email address")]
+        [System.ComponentModel.DataAnnotations.EmailAddress(ErrorMessage = "Please enter a valid email address")]
+        [System.ComponentModel.DataAnnotations.Display(Name = "Email Address")]
+        public string Email { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Phone(ErrorMessage = "Please enter a valid phone number")]
+        [System.ComponentModel.DataAnnotations.Display(Name = "Phone Number (Optional)")]
+        public string? PhoneNumber { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Please select a category")]
+        [System.ComponentModel.DataAnnotations.Display(Name = "Topic / Category")]
+        public string Category { get; set; } = "General Feedback";
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Please enter a subject")]
+        [System.ComponentModel.DataAnnotations.Display(Name = "Subject")]
+        public string Subject { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Please write your message or feedback")]
+        [System.ComponentModel.DataAnnotations.Display(Name = "Message")]
+        public string Message { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Range(1, 5)]
+        [System.ComponentModel.DataAnnotations.Display(Name = "Satisfaction Rating")]
+        public int Rating { get; set; } = 5;
+    }
 }

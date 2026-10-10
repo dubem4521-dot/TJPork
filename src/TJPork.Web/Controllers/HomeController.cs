@@ -15,11 +15,19 @@ namespace TJPork.Web.Controllers
     {
         private readonly IProductService _productService;
         private readonly TJPorkDbContext _db;
+        private readonly IEmailService? _emailService;
+        private readonly Microsoft.AspNetCore.Identity.UserManager<TJPork.Infrastructure.Identity.ApplicationUser>? _userManager;
 
-        public HomeController(IProductService productService, TJPorkDbContext db)
+        public HomeController(
+            IProductService productService, 
+            TJPorkDbContext db, 
+            IEmailService? emailService = null,
+            Microsoft.AspNetCore.Identity.UserManager<TJPork.Infrastructure.Identity.ApplicationUser>? userManager = null)
         {
             _productService = productService;
             _db = db;
+            _emailService = emailService;
+            _userManager = userManager;
         }
 
         public async Task<IActionResult> Index()
@@ -146,6 +154,94 @@ namespace TJPork.Web.Controllers
             });
 
             return Json(suggestions);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Feedback()
+        {
+            var model = new FeedbackViewModel();
+            if (User.Identity?.IsAuthenticated == true && _userManager != null)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    model.FullName = user.FullName ?? "";
+                    model.Email = user.Email ?? "";
+                    model.PhoneNumber = user.PhoneNumber ?? "";
+                }
+            }
+            return View(model);
+        }
+
+        [HttpGet]
+        public Task<IActionResult> Contact()
+        {
+            return Feedback();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Feedback(FeedbackViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                if (_emailService != null)
+                {
+                    // 1. Dispatch email alert to store owner / admin
+                    await _emailService.SendFeedbackNotificationToAdminAsync(
+                        model.FullName,
+                        model.Email,
+                        model.PhoneNumber,
+                        model.Subject,
+                        model.Message,
+                        model.Category,
+                        model.Rating);
+
+                    // 2. Dispatch automated confirmation email to customer
+                    await _emailService.SendFeedbackConfirmationToCustomerAsync(
+                        model.Email,
+                        model.FullName,
+                        model.Subject);
+                }
+
+                // 3. If registered user, record in-app notification
+                if (User.Identity?.IsAuthenticated == true && _userManager != null)
+                {
+                    var user = await _userManager.GetUserAsync(User);
+                    if (user != null)
+                    {
+                        _db.Notifications.Add(new Core.Entities.Notification
+                        {
+                            UserId = user.Id,
+                            Title = "Feedback Received",
+                            Message = $"Thank you for your feedback regarding '{model.Subject}'. Our team has received your note.",
+                            LinkUrl = "/",
+                            IconClass = "fa-solid fa-comment-dots",
+                            CreatedAt = System.DateTime.UtcNow
+                        });
+                        await _db.SaveChangesAsync();
+                    }
+                }
+            }
+            catch
+            {
+                // Handled gracefully in background
+            }
+
+            ViewBag.Submitted = true;
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public Task<IActionResult> Contact(FeedbackViewModel model)
+        {
+            return Feedback(model);
         }
 
         public IActionResult Privacy()

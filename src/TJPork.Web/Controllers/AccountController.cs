@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TJPork.Core.Entities;
+using TJPork.Core.Interfaces;
 using TJPork.Infrastructure.Data;
 using TJPork.Infrastructure.Identity;
 using TJPork.Web.ViewModels;
@@ -14,12 +15,18 @@ namespace TJPork.Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly TJPorkDbContext _db;
+        private readonly IEmailService _emailService;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, TJPorkDbContext db)
+        public AccountController(
+            UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager, 
+            TJPorkDbContext db,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _db = db;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -139,8 +146,102 @@ namespace TJPork.Web.Controllers
 
                 await _db.SaveChangesAsync();
 
+                // Send Email Sign-Up Notifications (Welcome to customer & alert to admin)
+                try
+                {
+                    await _emailService.SendWelcomeEmailAsync(user.Email!, user.FullName);
+                    await _emailService.SendAdminNewUserAlertAsync(user.Email!, user.FullName, user.PhoneNumber ?? "", user.DeliveryAddress ?? "", user.City ?? "");
+                }
+                catch
+                {
+                    // Suppress background email errors during registration
+                }
+
                 await _signInManager.SignInAsync(user, isPersistent: true);
                 return RedirectToAction("Index", "Profile");
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Index", "Profile");
+            }
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetLink = Url.Action("ResetPassword", "Account", new { token, email = user.Email }, Request.Scheme);
+                if (!string.IsNullOrEmpty(resetLink))
+                {
+                    try
+                    {
+                        await _emailService.SendPasswordResetEmailAsync(user.Email!, user.FullName, resetLink);
+                    }
+                    catch
+                    {
+                        // Logged internally
+                    }
+                }
+            }
+
+            ViewBag.Submitted = true;
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string? token = null, string? email = null)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var model = new ResetPasswordViewModel
+            {
+                Token = token,
+                Email = email
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal user existence
+                TempData["SuccessMessage"] = "Your password has been reset successfully. Please sign in.";
+                return RedirectToAction(nameof(Login));
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+            if (result.Succeeded)
+            {
+                TempData["SuccessMessage"] = "Your password has been reset successfully. Please sign in with your new password.";
+                return RedirectToAction(nameof(Login));
             }
 
             foreach (var error in result.Errors)

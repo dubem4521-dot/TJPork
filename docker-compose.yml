@@ -18,7 +18,7 @@ services:
       - Supabase__Bucket=${SUPABASE_BUCKET:-tjpork-images}
       - EmailSettings__SmtpHost=tjpork-mailhog
       - EmailSettings__SmtpPort=1025
-      - EmailSettings__FromEmail=orders@tjpork.com
+      - EmailSettings__FromEmail=orderstjpork@gmail.com
     volumes:
       - tjpork-data:/app/data
       - tjpork-images:/app/wwwroot/images

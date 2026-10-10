@@ -570,7 +570,7 @@ namespace TJPork.Web.Controllers
         public async Task<IActionResult> Analytics(DateTime? startDate, DateTime? endDate)
         {
             var summary = await _analyticsService.GetDashboardSummaryAsync();
-            var start = startDate ?? DateTime.UtcNow.AddDays(-30);
+            var start = startDate ?? (summary.HasTripReset ? summary.TripResetDate!.Value : DateTime.UtcNow.AddDays(-30));
             var end = endDate ?? DateTime.UtcNow;
 
             var viewModel = new AdminAnalyticsViewModel
@@ -581,6 +581,25 @@ namespace TJPork.Web.Controllers
             };
 
             return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetTripAnalytics(string? note)
+        {
+            var adminName = User.Identity?.Name ?? "Admin";
+            await _analyticsService.ResetTripBaselineAsync(adminName, note);
+            TempData["SuccessMessage"] = "Trip Meter has been successfully reset! Analytics are now tracking from right now. Lifetime records remain intact.";
+            return RedirectToAction(nameof(Analytics));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ClearTripBaseline()
+        {
+            await _analyticsService.ClearTripBaselineAsync();
+            TempData["SuccessMessage"] = "Trip Meter baseline cleared. Analytics tracking has synced with lifetime inception.";
+            return RedirectToAction(nameof(Analytics));
         }
 
         [HttpGet]
@@ -606,7 +625,7 @@ namespace TJPork.Web.Controllers
             var model = new AdminSettingsViewModel
             {
                 StoreName = settings.FirstOrDefault(s => s.Key == "StoreName")?.Value ?? "T&JPork Artisanal Meats",
-                ContactEmail = settings.FirstOrDefault(s => s.Key == "ContactEmail")?.Value ?? "orders@tjpork.com",
+                ContactEmail = settings.FirstOrDefault(s => s.Key == "ContactEmail")?.Value ?? "orderstjpork@gmail.com",
                 ContactPhone = settings.FirstOrDefault(s => s.Key == "ContactPhone")?.Value ?? "+27 (0)21 835 7675",
                 StandardDeliveryFee = decimal.TryParse(settings.FirstOrDefault(s => s.Key == "StandardDeliveryFee")?.Value, out var df) ? df : 65.00m,
                 FreeDeliveryThreshold = decimal.TryParse(settings.FirstOrDefault(s => s.Key == "FreeDeliveryThreshold")?.Value, out var ft) ? ft : 500.00m,
